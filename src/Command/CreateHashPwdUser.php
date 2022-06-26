@@ -45,7 +45,7 @@ class CreateHashPwdUser extends Command
     protected function configure()
     {
         // On set le nom de la commande
-        $this->setName('app:createhashpwduser');
+        $this->setName('app:createuser');
 
         // On set la description
         $this->setDescription("Créer un user avec un mdp hashé");
