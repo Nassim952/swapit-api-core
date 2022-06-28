@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'normalisation_context' => ['groups' => ['read:Exchange:collection','read:Exchange:item','read:User:collection']]
         ],
         'patch' => [
-            'denrmalization_context' => ['groups' => ['patch:Exchange:item']]
+            'denormalization_context' => ['groups' => ['patch:Exchange:item']]
         ] ,
         'delete',
         'accept' => [
