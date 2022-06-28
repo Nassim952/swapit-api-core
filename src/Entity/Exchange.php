@@ -20,8 +20,38 @@ use Symfony\Component\Serializer\Annotation\Groups;
         'patch' => [
             'denrmalization_context' => ['groups' => ['patch:Exchange:item']]
         ] ,
-        'delete'
+        'delete',
+        'accept' => [
+            'method' => 'PATCH',
+            'path' => '/exchanges/{id}/accept',
+            'controller' => ExchangeConfirmController::class,
+            'openapi_context' => [
+                'summary' => 'accept an exchange',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ]
         ],
+        'refuse' => [
+            'method' => 'PATCH',
+            'path' => '/exchanges/{id}/refuse',
+            'controller' => ExchangeRefuseController::class,
+            'openapi_context' => [
+                'summary' => 'refuse an exchange',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ]
+        ],
+    ],
     collectionOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection']]
