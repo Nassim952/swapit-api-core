@@ -78,11 +78,11 @@ class Exchange
     #[Groups(['write:Exchange:item','read:Exchange:collection'])]
     private $proposer;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['write:Exchange:item','read:Exchange:collection'])]
     private $proposerGame;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['write:Exchange:item','read:Exchange:collection'])]
     private $senderGame;
 
@@ -122,12 +122,12 @@ class Exchange
         return $this;
     }
 
-    public function getProposerGame(): string
+    public function getProposerGame(): ?int
     {
         return $this->proposerGame;
     }
 
-    public function setProposerGame(string $proposerGame): self
+    public function setProposerGame(?int $proposerGame): self
     {
         $this->proposerGame = $proposerGame;
 
@@ -135,12 +135,12 @@ class Exchange
     }
 
     
-    public function getSenderGame(): string
+    public function getSenderGame(): ?int
     {
         return $this->senderGame;
     }
 
-    public function setSenderGame(string $senderGame): self
+    public function setSenderGame(?int $senderGame): self
     {
         $this->senderGame = $senderGame;
 
