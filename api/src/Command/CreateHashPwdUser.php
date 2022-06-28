@@ -26,8 +26,8 @@ class CreateHashPwdUser extends Command
     {
         $user = new User();
         $user->setUsername('jwt');
-        $user->setEmail('jwt@gmail.com');
-        $plaintextPassword = 'password';
+        $user->setEmail('swapit@gmail.com');
+        $plaintextPassword = 'swapit75';
 
         // hash the password (based on the security.yaml config for the $user class)
         $hashedPassword = $this->passwordHasher->hashPassword(
