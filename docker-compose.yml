@@ -43,7 +43,7 @@ services:
       - pwa
     environment:
       PWA_UPSTREAM: pwa:3001
-      SERVER_NAME: ${SERVER_NAME:-:81}
+      SERVER_NAME: ${SERVER_NAME:-http://localhost:81, caddy:80}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
     restart: unless-stopped
