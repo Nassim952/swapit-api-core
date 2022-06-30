@@ -1,1 +1,1 @@
-web: caddy -port 80
+web: vendor/bin/heroku-php-apache2 public/
