@@ -361,18 +361,6 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
-    "symfony/mercure-bundle": {
-        "version": "0.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.3",
-            "ref": "e0a854b5439186e04b28fb8887b42c54f24a0d32"
-        },
-        "files": [
-            "config/packages/mercure.yaml"
-        ]
-    },
     "symfony/monolog-bridge": {
         "version": "v6.0.1"
     },
