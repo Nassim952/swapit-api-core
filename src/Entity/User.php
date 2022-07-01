@@ -108,6 +108,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         return (string) $this->email;
     }
 
+    public static function createFromPayload($email, array $payload)
+    {
+        $user = (new User())->setEmail($email);
+        return $user;
+    }
+
     public function getUsername(): string
     {
         return (string) $this->username;
@@ -171,12 +177,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         }
 
         return $this;
-    }
-
-    public static function createFromPayload($id, array $payload)
-    {
-        $user = (new User())->setId($id);
-        return $user;
     }
 
     /**
