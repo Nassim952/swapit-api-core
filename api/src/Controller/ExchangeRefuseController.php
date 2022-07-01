@@ -14,12 +14,12 @@ class ExchangeRefuseController{
     //     $this->igdb = $igdb;
     // }
 
-    // public function __invoke(Exchange $data): Exchange {
+    public function __invoke(Exchange $data): Exchange {
 
     //     if($data->getConfirmed() !== null){
     //         return $this->redirectToRoute('home');
     //     }
-    //     $data->setConfirmed(false);
+        $data->setConfirmed(false);
 
     //     $messageConfirmReceiver = (new \Swift_Message('Votre refus de swap a bien été prise en compte !'))
     //         ->setFrom('swapit.esgi@gmail.com')
@@ -58,6 +58,6 @@ class ExchangeRefuseController{
                 
     //     $mailer->send($messageConfirmProposer);
 
-        // return $data;
-    // }
+        return $data;
+    }
 }
