@@ -1,36 +1,34 @@
 <?php
 
 namespace App\DataPersister;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Entity\Exchange;
 
-class UserDataPersister implements ContextAwareDataPersisterInterface {
+class ExchangeDataPersister implements ContextAwareDataPersisterInterface {
 
     private $entityManager;
-    private $passwordHasher;
 
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher) {
+    public function __construct(EntityManagerInterface $entityManager) {
         $this->entityManager = $entityManager;
-        $this->passwordHasher = $passwordHasher;
     }
 
     public function supports($data, array $context = []) : bool
     {
-        return $data instanceof User;
+        return $data instanceof Exchange;
       
     }
 
     public function persist($data, array $context = [])
     {
-        if ($data->getPassword()) {
-            $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
-            $data->eraseCredentials();
-        }
+        $data->setOwner($data->getOwner());
+        $data->setProposer($data->getProposer());
+        $data->setProposerGame($data->getProposerGame());
+        $data->setSenderGame($data->getSenderGame());
+        // $data->setConfirmed(null);
+
         $this->entityManager->persist($data);
         $this->entityManager->flush();
-
     }
 
     public function remove($data, array $context = [])

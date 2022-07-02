@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\ExchangeRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\ExchangeRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ExchangeRefuseController;
+use App\Controller\ExchangeConfirmController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
@@ -29,7 +31,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 'summary' => 'accept an exchange',
                 'requestBody' => [
                     'content' => [
-                        'application/json' => [
+                        'application/merge-patch+json' => [
                             'schema' => []
                         ]
                     ]
@@ -44,7 +46,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 'summary' => 'refuse an exchange',
                 'requestBody' => [
                     'content' => [
-                        'application/json' => [
+                        'application/merge-patch+json' => [
                             'schema' => []
                         ]
                     ]
@@ -56,7 +58,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection']]
         ],
-        'post'
+        'post'=> [
+            'denormalization_context' => ['groups' => ['write:Exchange:item']]
+        ],
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
@@ -90,8 +94,6 @@ class Exchange
     #[ORM\Column(type: 'boolean', nullable: true)]
     #[Groups(['write:Exchange:item','read:Exchange:collection'])]
     private $confirmed;
-
-   
 
     public function getId(): ?int
     {

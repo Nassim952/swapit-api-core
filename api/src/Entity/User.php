@@ -11,6 +11,7 @@ use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\DataPersister\UserDataPersister;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\PasswordHasher\Hasher\PlaintextPasswordHasher;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,7 +21,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
-    mercure: true,
     itemOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']]
@@ -108,6 +108,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         return (string) $this->email;
     }
 
+    public static function createFromPayload($email, array $payload)
+    {
+        $user = (new User())->setEmail($email);
+        return $user;
+    }
+
     public function getUsername(): string
     {
         return (string) $this->username;
@@ -171,12 +177,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         }
 
         return $this;
-    }
-
-    public static function createFromPayload($email, array $payload)
-    {
-        $user = (new User())->setEmail($email);
-        return $user;
     }
 
     /**
