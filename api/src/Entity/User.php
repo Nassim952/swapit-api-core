@@ -4,14 +4,18 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+
 use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Filter\Userfilter;
+
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+
 use App\DataPersister\UserDataPersister;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\PasswordHasher\Hasher\PlaintextPasswordHasher;
@@ -37,6 +41,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
+#[ApiFilter(UserFilter::class)]
 #[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
