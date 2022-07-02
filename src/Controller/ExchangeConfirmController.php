@@ -3,21 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Exchange;
-use App\lib\IgdbBundle\IgdbWrapper\IgdbWrapper;
 
 class ExchangeConfirmController{
 
-    private $igdb;
-
-    // public function __construct(IgdbWrapper $igdb){
-    //     $this->igdb = $igdb;
-    // }
-
-    // public function __invoke(Exchange $data): Exchange {
+    public function __invoke(Exchange $data): Exchange {
         // if($data->getConfirmed() !== null){
-        //     return $this->redirectToRoute('home');
+        //     // return $this->redirectToRoute('home');
         // }
-        // $data->setConfirmed(true);
+        $data->setConfirmed(true);
 
         // $messageConfirmReceiver = (new \Swift_Message('Votre confirmation de swap a bien été prise en compte !'))
         //     ->setFrom('swapit.esgi@gmail.com')
@@ -57,6 +50,6 @@ class ExchangeConfirmController{
                 
         // $mailer->send($messageConfirmProposer);
     
-        // return $data;
-    // }
+        return $data;
+    }
 }

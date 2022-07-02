@@ -55,9 +55,13 @@ security:
         - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
         # Entity Users & Exchanges
-        - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [PUT, PATCH, DELETE] }
+        - {
+              path: ^/users,
+              roles: IS_AUTHENTICATED_FULLY,
+              methods: [PUT, PATCH, DELETE],
+          }
         - { path: ^/exchanges, roles: PUBLIC_ACCESS }
-        
+
         # Backend Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: "^/admin/users", roles: ROLE_SUPER_ADMIN }
