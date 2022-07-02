@@ -36,11 +36,12 @@ final class UserFilter extends AbstractContextAwareFilter
         }
 
         if($property  == 'owned_games'){
-            $queryBuilder = $queryBuilder->where("$parameterName IN (:$alias.ownGames)")
+            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.ownGames)")
                 ->setParameter($parameterName, $value);
         }
         if($property  == 'wished_games') {
-            $queryBuilder = $queryBuilder->where("$parameterName IN (:$alias.wishGames)")
+
+            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.wishGames)")
                 ->setParameter($parameterName, $value);
         }
 
