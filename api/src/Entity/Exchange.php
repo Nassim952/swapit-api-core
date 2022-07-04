@@ -31,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'summary' => 'accept an exchange',
                 'requestBody' => [
                     'content' => [
-                        'application/merge-patch+json' => [
+                        'application/json' => [
                             'schema' => []
                         ]
                     ]
