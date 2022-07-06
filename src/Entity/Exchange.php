@@ -14,18 +14,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: ExchangeRepository::class)]
-#[ApiResource(mercure: true,
+#[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection','read:Exchange:item','read:User:collection']]
+            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection']]
         ],
         'patch' => [
             'denormalization_context' => ['groups' => ['patch:Exchange:item']],
-            "security" => "is_granted('EDIT', object)"
-        ] ,
+            "security" => "is_granted('edit', object)",
+            "security_message" => "Only admins or Owner can patch."
+        ],
         'delete' => [
-            "security" => "is_granted('DELETE', object)"
-        ] ,
+            "security" => "is_granted('delete', object)",
+            "security_message" => "Only admins or Owner can delete."
+        ],
         'accept' => [
             'method' => 'PATCH',
             'path' => '/exchanges/{id}/accept',
@@ -39,8 +41,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ]
                     ]
                 ]
-                        ],
-            "security" => "is_granted('EDIT', object)"
+            ],
+            "security" => "is_granted('edit', object)",
+            "security_message" => "Only admins or Owner can patch."
         ],
         'refuse' => [
             'method' => 'PATCH',
@@ -56,14 +59,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ]
                 ]
             ],
-            "security" => "is_granted('EDIT', object)"
+            "security" => "is_granted('edit', object)",
+            "security_message" => "Only admins or Owner can patch."
         ],
     ],
     collectionOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection']]
         ],
-        'post'=> [
+        'post' => [
             'denormalization_context' => ['groups' => ['write:Exchange:item']]
         ],
     ]
@@ -79,25 +83,25 @@ class Exchange
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'receivedExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item','read:Exchange:collection'])]
+    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
     private $owner;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'sendExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item','read:Exchange:collection'])]
+    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
     private $proposer;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item','read:Exchange:collection'])]
+    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
     private $proposerGame;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item','read:Exchange:collection'])]
+    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
     private $senderGame;
 
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['write:Exchange:item','read:Exchange:collection'])]
+    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
     private $confirmed;
 
     public function getId(): ?int
@@ -141,7 +145,7 @@ class Exchange
         return $this;
     }
 
-    
+
     public function getSenderGame(): ?int
     {
         return $this->senderGame;
@@ -165,5 +169,4 @@ class Exchange
 
         return $this;
     }
-
 }

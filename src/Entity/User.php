@@ -30,8 +30,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']]
         ],
-        'patch'=>["security_post_denormalize" => "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)"],
-        'delete' =>["security_post_denormalize" => "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)"],
+        'patch' => [
+            "security" => "is_granted('edit', object)",
+            "security_message" => "Only admins or Owner can patch."
+        ],
+        'delete' => [
+            "security" => "is_granted('delete', object)",
+            "security_message" => "Only admins or Owner can delete."
+        ],
     ],
     collectionOperations: [
         'get' => [
@@ -96,6 +102,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this;
     }
 
     public function setId($id): self

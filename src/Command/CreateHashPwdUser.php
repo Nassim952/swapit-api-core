@@ -25,9 +25,9 @@ class CreateHashPwdUser extends Command
     public function createUser()
     {
         $user = new User();
-        $user->setUsername('jwt');
-        $user->setEmail('swapit@gmail.com');
-        $plaintextPassword = 'swapit75';
+        $user->setUsername('Super Admin');
+        $user->setEmail('swapit-admin@gmail.com');
+        $plaintextPassword = 'password';
 
         // hash the password (based on the security.yaml config for the $user class)
         $hashedPassword = $this->passwordHasher->hashPassword(
@@ -35,7 +35,7 @@ class CreateHashPwdUser extends Command
             $plaintextPassword
         );
         $user->setPassword($hashedPassword);
-        $user->setRoles(['ROLE_USER']);
+        $user->setRoles(['ROLE_ADMIN']);
 
         // and save user in db
         $this->em->persist($user);
