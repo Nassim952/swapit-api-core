@@ -11,11 +11,12 @@ class ExchangeVoter extends Voter
     // these strings are just invented: you can use anything
     const VIEW = 'view';
     const EDIT = 'edit';
+    CONST DELETE = 'delete';
 
     protected function supports(string $attribute, $subject): bool
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, [self::VIEW, self::EDIT])) {
+        if (!in_array($attribute, [self::VIEW, self::EDIT, self::DELETE])) {
             return false;
         }
 
@@ -45,6 +46,8 @@ class ExchangeVoter extends Voter
                 return $this->canView($Exchange, $user);
             case self::EDIT:
                 return $this->canEdit($Exchange, $user);
+            case self::DELETE:
+                return $this->canDelete($Exchange, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -56,14 +59,19 @@ class ExchangeVoter extends Voter
         if ($this->canEdit($Exchange, $user)) {
             return true;
         }
-
         // the Exchange object could have, for example, a method `isPrivate()`
-        return ($Exchange->getUserOwner() == $user || $Exchange->getUserProposer() == $user );
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
     }
 
     private function canEdit(Exchange $Exchange, User $user): bool
     {
         // this assumes that the Exchange object has a `getOwner()` method
-        return $user === $Exchange->getUserOwner();
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
+    }
+
+    private function canDelete(Exchange $Exchange, User $user): bool
+    {
+        // this assumes that the Exchange object has a `getOwner()` method
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
     }
 }

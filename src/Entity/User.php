@@ -30,8 +30,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']]
         ],
-        'patch',
-        'delete'
+        'patch'=>["security_post_denormalize" => "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)"],
+        'delete' =>["security_post_denormalize" => "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)"],
     ],
     collectionOperations: [
         'get' => [
