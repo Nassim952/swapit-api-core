@@ -51,19 +51,19 @@ security:
             jwt: ~
 
     access_control:
-        - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: '%env(SECURE_SCHEME)%' } # Allows accessing the Swagger UI
-        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: '%env(SECURE_SCHEME)%' }
+        - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Allows accessing the Swagger UI
+        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
         # Entity Users & Exchanges
         - {
               path: ^/users,
               roles: IS_AUTHENTICATED_FULLY,
               methods: [PUT, PATCH, DELETE], 
-              requires_channel: '%env(SECURE_SCHEME)%'
+        
           }
-        - { path: ^/exchanges, roles: PUBLIC_ACCESS, requires_channel: '%env(SECURE_SCHEME)%' }
+        - { path: ^/exchanges, roles: PUBLIC_ACCESS }
 
         # Backend Admin
-        - { path: ^/admin, roles: ROLE_ADMIN, requires_channel: '%env(SECURE_SCHEME)%' }
-        - { path: "^/admin/users", roles: ROLE_SUPER_ADMIN, requires_channel: '%env(SECURE_SCHEME)%' }
-        - { path: ^/admin/login, roles: PUBLIC_ACCESS, requires_channel: '%env(SECURE_SCHEME)%' }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: "^/admin/users", roles: ROLE_SUPER_ADMIN }
+        - { path: ^/admin/login, roles: PUBLIC_ACCESS }
