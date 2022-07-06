@@ -1,0 +1,26 @@
+<?php
+declare(strict_types=1);
+namespace App\Tests\Api;
+
+use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Entity\User;
+
+class UserTest extends ApiTestCase
+{
+   private User $user;
+   protected function init_setup()
+   {
+      parent::setUp();
+      $this->user = new User();
+   }
+   public function testGetEmail():void
+   {
+      $value = "test@test.fr";
+      $response = $this->user->setEmail($value);; 
+      self::assertInstanceOf(User::class, $response);
+      self::assertEquals($value, $this->user->getEmail());
+
+     
+   }
+
+}
