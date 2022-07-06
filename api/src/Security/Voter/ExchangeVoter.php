@@ -1,34 +1,41 @@
 <?php
-namespace App\Security;
+namespace App\Security\Voter;
 
-use App\Entity\Exchange;
 use App\Entity\User;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use App\Entity\Exchange;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class ExchangeVoter extends Voter
 {
+    private $security = null;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
+    
     // these strings are just invented: you can use anything
-    const VIEW = 'view';
+    const VIEW = 'VIEW';
     const EDIT = 'edit';
-    CONST DELETE = 'delete';
+    const DELETE = 'delete';
 
     protected function supports(string $attribute, $subject): bool
     {
-        // if the attribute isn't one we support, return false
-        if (!in_array($attribute, [self::VIEW, self::EDIT, self::DELETE])) {
-            return false;
-        }
+        $supportsAttribute = in_array($attribute, [self::VIEW, self::EDIT, self::DELETE]);
+        $supportsSubject = $subject instanceof Exchange;
 
-        // only vote on `Exchange` objects
-        if (!$subject instanceof Exchange) {
-            return false;
-        }
-
-        return true;
+        return $supportsAttribute && $supportsSubject;
     }
 
-    protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
+    /**
+     * @param string $attribute
+     * @param Exchange $exchange
+     * @param TokenInterface $token
+     * @return bool
+     */
+    protected function voteOnAttribute(string $attribute, $exchange, TokenInterface $token): bool
     {
         $user = $token->getUser();
 
@@ -37,9 +44,9 @@ class ExchangeVoter extends Voter
             return false;
         }
 
-        // you know $subject is a Exchange object, thanks to `supports()`
+        // you know $exchange is a Exchange object, thanks to `supports()`
         /** @var Exchange $Exchange */
-        $Exchange = $subject;
+        $Exchange = $exchange;
 
         switch ($attribute) {
             case self::VIEW:
@@ -60,18 +67,18 @@ class ExchangeVoter extends Voter
             return true;
         }
         // the Exchange object could have, for example, a method `isPrivate()`
-        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted('ROLE_ADMIN'));
     }
 
     private function canEdit(Exchange $Exchange, User $user): bool
     {
         // this assumes that the Exchange object has a `getOwner()` method
-        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted('ROLE_ADMIN'));
     }
 
     private function canDelete(Exchange $Exchange, User $user): bool
     {
         // this assumes that the Exchange object has a `getOwner()` method
-        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted(Role::ADMIN));
+        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted('ROLE_ADMIN'));
     }
 }
