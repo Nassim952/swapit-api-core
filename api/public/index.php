@@ -2,6 +2,8 @@
 
 use App\Kernel;
 
+echo "<meta http-equiv='Content-Security-Policy' content='upgrade-insecure-requests'>";
+
 $_SERVER['HTTPS'] = 'on';
 
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
