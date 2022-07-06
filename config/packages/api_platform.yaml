@@ -9,8 +9,8 @@ api_platform:
         versions: [3]
         api_keys:
             apiKey:
-            name: Authorization
-            type: header
+                name: Authorization
+                type: header
     defaults:
         stateless: true
         cache_headers:
