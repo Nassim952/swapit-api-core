@@ -20,9 +20,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             'normalisation_context' => ['groups' => ['read:Exchange:collection','read:Exchange:item','read:User:collection']]
         ],
         'patch' => [
-            'denormalization_context' => ['groups' => ['patch:Exchange:item']]
+            'denormalization_context' => ['groups' => ['patch:Exchange:item']],
+            "security" => "is_granted('EDIT', object)"
         ] ,
-        'delete',
+        'delete' => [
+            "security" => "is_granted('DELETE', object)"
+        ] ,
         'accept' => [
             'method' => 'PATCH',
             'path' => '/exchanges/{id}/accept',
@@ -36,7 +39,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ]
                     ]
                 ]
-            ]
+                        ],
+            "security" => "is_granted('EDIT', object)"
         ],
         'refuse' => [
             'method' => 'PATCH',
@@ -51,7 +55,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ]
                     ]
                 ]
-            ]
+            ],
+            "security" => "is_granted('EDIT', object)"
         ],
     ],
     collectionOperations: [
