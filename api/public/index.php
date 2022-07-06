@@ -2,6 +2,8 @@
 
 use App\Kernel;
 
+$_SERVER['HTTPS'] = 'on';
+
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
 return function (array $context) {
