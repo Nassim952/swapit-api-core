@@ -6,14 +6,8 @@ api_platform:
     patch_formats:
         json: ['application/json']
     swagger:
-         api_keys:
-             apiKey:
-                name: Authorization
-                type: header
-    # Mercure integration, remove if unwanted
-    # mercure: ~
-    # Good cache defaults for REST APIs
-    # defaults:
-    #     stateless: true
-    #     cache_headers:
-    #         vary: ['Content-Type', 'Authorization', 'Origin']
+        versions: [3]
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
