@@ -24,7 +24,7 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
 
     public function persist($data, array $context = [])
     {
-        if ($data->getPassword()) {
+        if ($data->getPassword() && !preg_match('/^$2y/', $data->getPassword())) {
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
             $data->eraseCredentials();
         }
