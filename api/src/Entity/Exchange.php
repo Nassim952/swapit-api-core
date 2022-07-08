@@ -10,6 +10,11 @@ use App\Controller\ExchangeConfirmController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use App\Filter\ExchangeFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+
 
 
 
@@ -72,6 +77,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         ],
     ]
 )]
+#[ApiFilter(ExchangeFilter::class)]
+#[ApiFilter(SearchFilter::class, properties: ['confirmed' => 'exact'])]
 #[ApiFilter(PropertyFilter::class)]
 class Exchange
 {
