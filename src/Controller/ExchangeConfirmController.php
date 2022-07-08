@@ -3,52 +3,22 @@
 namespace App\Controller;
 
 use App\Entity\Exchange;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 
-class ExchangeConfirmController{
+class ExchangeConfirmController {
 
-    public function __invoke(Exchange $data): Exchange {
-        // if($data->getConfirmed() !== null){
-        //     // return $this->redirectToRoute('home');
-        // }
+    public function __invoke(Exchange $data, MailerInterface $mailer): Exchange {
+        
         $data->setConfirmed(true);
 
-        // $messageConfirmReceiver = (new \Swift_Message('Votre confirmation de swap a bien été prise en compte !'))
-        //     ->setFrom('swapit.esgi@gmail.com')
-        //     ->setTo($data->getUserOwner()->getEmail())
-        //     ->setBody(
-        //         $this->renderView(
-        //             'mail/swap_confirmation_to_owner.html.twig',
-        //             [
-        //                 'exchange' => $data,
-        //                 'user' => $data->getUserProposer(),
-        //                 'ownerGame' => $data->getOwnerGame(),
-        //                 'selected_game' => $data->getGame(),
-        //                 'owner' => $data->getUserOwner()
-        //             ]
-        //             ),
-        //             'text/html'
-        //         );
-                
-        // $mailer->send($messageConfirmReceiver);
-
-        // $messageConfirmProposer = (new \Swift_Message('Votre demande de swap a bien été validée !'))
-        //     ->setFrom('swapit.esgi@gmail.com')
-        //     ->setTo($data->getUserProposer()->getEmail())
-        //     ->setBody(
-        //         $this->renderView(
-        //             'mail/swap_confirmation_to_proposer.html.twig',
-        //             [
-        //                 'exchange' => $data,
-        //                 'user' => $data->getUserProposer(),
-        //                 'ownerGame' => $data->getOwnerGame(),
-        //                 'selected_game' => $data->getGame(),
-        //                 'owner' => $data->getUserOwner()
-        //             ]
-        //             ),
-        //             'text/html'
-        //         );
-                
-        // $mailer->send($messageConfirmProposer);
+        $email = (new Email())
+            ->from('swapit.esgi@gmail.com')
+            ->to('nasfahdine@gmail.com')
+            ->subject('Confirmation de votre demande')
+            ->text('Votre demande a bien été prise en compte. Vous serez contacté par un membre de l\'équipe pour vous conformer à votre demande.');
+        
+            $mailer->send($email);
     
         return $data;
     }
