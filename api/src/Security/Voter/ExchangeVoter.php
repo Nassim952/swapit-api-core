@@ -17,7 +17,7 @@ class ExchangeVoter extends Voter
     }
     
     // these strings are just invented: you can use anything
-    const VIEW = 'VIEW';
+    const VIEW = 'view';
     const EDIT = 'edit';
     const DELETE = 'delete';
 
