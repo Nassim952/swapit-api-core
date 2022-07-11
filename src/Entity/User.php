@@ -28,22 +28,29 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']]
+            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']],
+            // "security" => "is_granted('view', object)",
+            // "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
             "security" => "is_granted('edit', object)",
-            "security_message" => "Only admins or Owner can patch."
+            "security_message" => "Only Admin or Owner can patch."
         ],
         'delete' => [
             "security" => "is_granted('delete', object)",
-            "security_message" => "Only admins or Owner can delete."
+            "security_message" => "Only Admin or Owner can delete."
         ],
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:User:collection']]
+            'normalisation_context' => ['groups' => ['read:User:collection']],
+            // "security" => "is_granted('view', object)",
+            // "security_message" => "Only Admin or Owner can view this resource."
         ],
-        'post'
+        'post' => [
+            // "security" => "is_granted('postAdmin', object)",
+            // "security_message" => "Only admin can create Admin users."
+        ],
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
