@@ -29,8 +29,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     itemOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']],
-            "security" => "is_granted('view', object)",
-            "security_message" => "Only Admin or Owner can view this resource."
+            // "security" => "is_granted('view', object)",
+            // "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
             "security" => "is_granted('edit', object)",
@@ -44,8 +44,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     collectionOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:User:collection']],
-            "security" => "is_granted('viewCollection', object)",
-            "security_message" => "Only Admin or Owner can view this resource."
+            // "security" => "is_granted('ROLE_ADMIN')",
+            // "security_message" => "Only Admin or Owner can view this resource."
         ],
         'post' => [
             // "security" => "is_granted('postAdmin', object)",
@@ -77,7 +77,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[Assert\Email]
     #[Assert\NotBlank]
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
     private $email;
 
     #[ORM\Column(type: 'json')]
