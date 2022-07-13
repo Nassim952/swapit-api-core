@@ -3,6 +3,7 @@ namespace App\Security\Voter;
 
 use App\Entity\User;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -93,7 +94,7 @@ class UserVoter extends Voter
     private function canViewCollection(User $userObject, User $currentUser): bool
     {
         // this assumes that the User object has a `getOwner()` method
-        return ($currentUser->getUser() == $userObject || $this->security->isGranted('ROLE_ADMIN'));
+        return ($this->security->isGranted('ROLE_ADMIN'));
     }
 
     // public function canPostAdmin(User $userObject, User $currentUser): bool

@@ -32,7 +32,7 @@ security:
 
         users:
             pattern: ^/users
-            methods: [GET, PUT, PATCH, DELETE]
+            methods: [PUT, PATCH, DELETE]
             stateless: true
             jwt: ~
 
@@ -58,7 +58,7 @@ security:
         - {
             path: ^/users,
             roles: IS_AUTHENTICATED_FULLY,
-            methods: [GET, PUT, PATCH, DELETE],
+            methods: [PUT, PATCH, DELETE],
           }
         - { path: ^/exchanges, roles: IS_AUTHENTICATED_FULLY }
 
