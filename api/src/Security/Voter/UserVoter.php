@@ -3,6 +3,7 @@ namespace App\Security\Voter;
 
 use App\Entity\User;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -19,10 +20,12 @@ class UserVoter extends Voter
     const VIEW = 'view';
     const EDIT = 'edit';
     const DELETE = 'delete';
+    const POSTADMIN = 'postAdmin';
+    const VIEWCOLLECTION = 'viewCollection';
 
     protected function supports($attribute, $subject): bool
     {
-        $supportsAttribute = in_array($attribute, [self::VIEW, self::EDIT, self::DELETE]);
+        $supportsAttribute = in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::POSTADMIN, self::VIEWCOLLECTION]);
         $supportsSubject = $subject instanceof User;
 
         return $supportsAttribute && $supportsSubject;
@@ -55,6 +58,12 @@ class UserVoter extends Voter
                 return $this->canEdit($UserObject, $currentUser);
             case self::DELETE:
                 return $this->canDelete($UserObject, $currentUser);
+            case self::VIEWCOLLECTION:
+                return $this->canViewCollection($UserObject, $currentUser);
+            // case self::POSTADMIN:
+            //     return $this->canPostAdmin($UserObject, $currentUser);
+            // case self::CREATE:
+            //     return $this->canCreate($UserObject, $currentUser);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -81,4 +90,15 @@ class UserVoter extends Voter
         // this assumes that the User object has a `getOwner()` method
         return ($currentUser->getUser() == $userObject || $this->security->isGranted('ROLE_ADMIN'));
     }
+
+    private function canViewCollection(): bool
+    {
+        return true;
+    }
+
+    // public function canPostAdmin(User $userObject, User $currentUser): bool
+    // {
+    //     // this assumes that the User object has a `getOwner()` method
+    //     return ($this->security->isGranted('ROLE_ADMIN'));
+    // }
 }

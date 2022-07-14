@@ -32,7 +32,7 @@ security:
 
         users:
             pattern: ^/users
-            methods: [PUT, PATCH, DELETE]
+            methods: [GET, PUT, PATCH, DELETE]
             stateless: true
             jwt: ~
 
@@ -40,7 +40,7 @@ security:
             pattern: ^/exchanges
             stateless: true
             lazy: true
-            methods: [PUT, PATCH, DELETE]
+            methods: [GET, PUT, PATCH, DELETE]
             provider: users
             jwt: ~
 
@@ -56,12 +56,11 @@ security:
 
         # Entity Users & Exchanges
         - {
-              path: ^/users,
-              roles: IS_AUTHENTICATED_FULLY,
-              methods: [PUT, PATCH, DELETE], 
-        
-          }
-        - { path: ^/exchanges, roles: PUBLIC_ACCESS }
+            path: ^/users,
+            roles: IS_AUTHENTICATED_FULLY,
+            methods: [PUT, PATCH, DELETE],
+        }
+        - { path: ^/exchanges, roles: IS_AUTHENTICATED_FULLY }
 
         # Backend Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
