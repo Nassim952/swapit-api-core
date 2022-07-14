@@ -19,7 +19,6 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
     public function supports($data, array $context = []) : bool
     {
         return $data instanceof User;
-      
     }
 
     public function persist($data, array $context = [])
@@ -28,6 +27,11 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
             $data->eraseCredentials();
         }
+        
+        if($data->getRoles() == 'ROLE_ADMIN'){
+            $data->setRoles(['ROLE_USER']);
+        }
+
         $this->entityManager->persist($data);
         $this->entityManager->flush();
 
@@ -37,6 +41,5 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
     {
         $this->entityManager->remove($data);
         $this->entityManager->flush();
-      
     }
 }
