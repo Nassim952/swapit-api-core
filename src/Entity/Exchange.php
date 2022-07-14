@@ -58,7 +58,7 @@ use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
                 'summary' => 'refuse an exchange',
                 'requestBody' => [
                     'content' => [
-                        'application/merge-patch+json' => [
+                        'application/json' => [
                             'schema' => []
                         ]
                     ]
