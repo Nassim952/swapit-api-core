@@ -35,6 +35,6 @@ services:
         arguments: ['@App\OpenApi\JwtDecorator.inner']
 
     swapit_api.event.jwt_created_listener:
-        class: App\EventListener\JWTCreatedListener
+        class: App\EventListener\JWTSubscriber
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onLexikJwtAuthenticationOnJwtCreated }
