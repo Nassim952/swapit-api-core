@@ -14,13 +14,13 @@ class ExchangeRefuseController
 
         $data->setConfirmed(false);
 
-        $email = (new Email())
-            ->from('swapit.esgi@gmail.com')
-            ->to('nasfahdine@gmail.com')
-            ->subject('Confirmation de votre refus')
-            ->text('Votre refus d\'échange a bien été prise en compte. Vous serez contacté par un membre de l\'équipe pour vous conformer à votre demande.');
+        // $email = (new Email())
+        //     ->from('swapit.esgi@gmail.com')
+        //     ->to('nasfahdine@gmail.com')
+        //     ->subject('Confirmation de votre refus')
+        //     ->text('Votre refus d\'échange a bien été prise en compte. Vous serez contacté par un membre de l\'équipe pour vous conformer à votre demande.');
 
-        $mailer->send($email);
+        // $mailer->send($email);
 
         return $data;
     }
