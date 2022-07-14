@@ -91,10 +91,9 @@ class UserVoter extends Voter
         return ($currentUser->getUser() == $userObject || $this->security->isGranted('ROLE_ADMIN'));
     }
 
-    private function canViewCollection(User $userObject, User $currentUser): bool
+    private function canViewCollection(): bool
     {
-        // this assumes that the User object has a `getOwner()` method
-        return ($this->security->isGranted('ROLE_ADMIN'));
+        return true;
     }
 
     // public function canPostAdmin(User $userObject, User $currentUser): bool

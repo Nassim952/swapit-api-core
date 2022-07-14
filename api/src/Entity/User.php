@@ -44,8 +44,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     collectionOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:User:collection']],
-            // "security" => "is_granted('ROLE_ADMIN')",
-            // "security_message" => "Only Admin or Owner can view this resource."
+            "security" => "is_granted('ROLE_ADMIN')",
+            "security_message" => "Only Admin or Owner can view this resource."
         ],
         'post' => [
             // "security" => "is_granted('postAdmin', object)",

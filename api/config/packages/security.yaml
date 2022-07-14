@@ -32,7 +32,7 @@ security:
 
         users:
             pattern: ^/users
-            methods: [PUT, PATCH, DELETE]
+            methods: [GET, PUT, PATCH, DELETE]
             stateless: true
             jwt: ~
 
