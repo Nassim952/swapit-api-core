@@ -10,7 +10,7 @@ use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
 use App\lib\IgdbBundle\IgdbWrapper;
 
-final class ExchangeFilter extends AbstractContextAwareFilter
+final class CountFilter extends AbstractContextAwareFilter
 {
     protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, string $operationName = null)
     {
@@ -30,14 +30,13 @@ final class ExchangeFilter extends AbstractContextAwareFilter
         $parameterName = $queryNameGenerator->generateParameterName($property); // Generate a unique parameter name to avoid collisions with other filters
  
 
-        if ($property  == 'pending') {
-            $queryBuilder = $queryBuilder->where("$alias.confirmed IS NULL");  
+        if($property == 'count') {
+            if ($value) {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->Join("$alias.$value", 'e')->groupBy("$alias.id");
+            } else {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->groupBy("$alias.id");
+            }
         }
-
-        if ($property  == 'answered') {
-            $queryBuilder = $queryBuilder->where("$alias.confirmed IS FALSE")->orWhere("$alias.confirmed IS TRUE");;  
-        }
-
     }
 
     // This function is only used to hook in documentation generators (supported by Swagger and Hydra)
