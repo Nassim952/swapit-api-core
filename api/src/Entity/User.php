@@ -2,25 +2,25 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
-
-use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Filter\Userfilter;
+use Doctrine\ORM\Mapping as ORM;
 
+use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
+
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-use App\DataPersister\UserDataPersister;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
-use Symfony\Component\PasswordHasher\Hasher\PlaintextPasswordHasher;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Controller\UserGenerateTokenPasswordController;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Controller\UserSetPasswordTokenToNullController;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -40,6 +40,37 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             "security" => "is_granted('delete', object)",
             "security_message" => "Only Admin or Owner can delete."
         ],
+        'user-generate-token-password' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/generate-token-password',
+            'controller' => UserGenerateTokenPasswordController::class,
+            'openapi_context' => [
+                'summary' => 'generate token password',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'set-token-reset-password-to-null' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/set-token-reset-password-to-null',
+            'controller' => UserSetPasswordTokenToNullController::class,
+            'openapi_context' => [
+                'summary' => 'set token reset password to null',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        
     ],
     collectionOperations: [
         'get' => [
@@ -55,7 +86,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 )]
 #[ApiFilter(PropertyFilter::class)]
 #[ApiFilter(UserFilter::class)]
-#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'resetTokenPassword' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
@@ -83,6 +114,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Column(type: 'json')]
     #[Groups(['read:User:item', 'write:User:item'])]
     private $roles = ["ROLE_USER"];
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $resetTokenPassword;
 
     #[Groups(['read:User:item', 'patch:User:item'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
@@ -171,6 +206,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     {
         $this->email = $email;
 
+        return $this;
+    }
+
+    public function getResetTokenPassword(): ?string
+    {
+        return $this->resetTokenPassword;
+    }
+
+    public function setResetTokenPassword(string $tokenPassword): self
+    {
+        $this->resetTokenPassword = $tokenPassword;
         return $this;
     }
 
