@@ -30,21 +30,20 @@ final class UserFilter extends AbstractContextAwareFilter
         $parameterName = $queryNameGenerator->generateParameterName($property); // Generate a unique parameter name to avoid collisions with other filters
  
 
-        if ($property  == 'ids') {
-            $queryBuilder = $queryBuilder->where("$alias.id IN (:$parameterName)")
+        // if ($property  == 'ids') {
+        //     $queryBuilder = $queryBuilder->where("$alias.id IN (:$parameterName)")
+        //         ->setParameter($parameterName, $value);
+        // }
+
+        // if($property  == 'ownGames' || $property  == 'wishGames'){
+        //     $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.$property)")
+        //         ->setParameter($parameterName, $value);
+        // }
+
+        if($property  == 'involved_companies'){
+            $queryBuilder =  $queryBuilder->Join("$alias.$property", 'ge')->andWhere("ge.id IN (:$parameterName)")
                 ->setParameter($parameterName, $value);
         }
-
-        if($property  == 'owned_games'){
-            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.ownGames)")
-                ->setParameter($parameterName, $value);
-        }
-        if($property  == 'wished_games') {
-
-            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.wishGames)")
-                ->setParameter($parameterName, $value);
-        }
-
     }
 
     // This function is only used to hook in documentation generators (supported by Swagger and Hydra)

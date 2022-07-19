@@ -73,7 +73,7 @@ class ExchangeVoter extends Voter
     private function canEdit(Exchange $Exchange, User $user): bool
     {
         // this assumes that the Exchange object has a `getOwner()` method
-        return ($Exchange->getOwner() == $user || $Exchange->getProposer() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return ($Exchange->getOwner() == $user || $this->security->isGranted('ROLE_ADMIN'));
     }
 
     private function canDelete(Exchange $Exchange, User $user): bool

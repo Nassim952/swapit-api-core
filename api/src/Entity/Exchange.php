@@ -12,9 +12,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Annotation\ApiFilter;
-use App\Filter\ExchangeFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
-
+use App\Filter\ExchangeFilter;
+use App\Filter\CountFilter;
 
 
 
@@ -80,6 +80,7 @@ use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 #[ApiFilter(ExchangeFilter::class)]
 #[ApiFilter(SearchFilter::class, properties: ['confirmed' => 'exact'])]
 #[ApiFilter(PropertyFilter::class)]
+#[ApiFilter(CountFilter::class)]
 class Exchange
 {
     #[ORM\Id]

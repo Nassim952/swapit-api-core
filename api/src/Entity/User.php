@@ -9,6 +9,7 @@ use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Filter\Userfilter;
+use App\Filter\CountFilter;
 
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -48,7 +49,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 )]
 #[ApiFilter(PropertyFilter::class)]
 #[ApiFilter(UserFilter::class)]
-#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact'])]
+#[ApiFilter(CountFilter::class)]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'ownGames' => 'exact', 'wishGames' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
@@ -88,15 +90,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private $sendExchanges;
 
     #[ORM\Column(type: 'array', nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
     private $ownGames = [];
 
     #[ORM\Column(type: 'array', nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
     private $wishGames = [];
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Channel::class, orphanRemoval: true)]
+    #[ApiSubresource]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $channels;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Channel::class, orphanRemoval: true)]
+    #[ApiSubresource]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $channels_received;
 
     public function __construct()
     {
         $this->receivedExchanges = new ArrayCollection();
         $this->sendExchanges = new ArrayCollection();
+        $this->channels = new ArrayCollection();
+        $this->channels_received = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -283,6 +299,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function setWishGames(?array $wishGames): self
     {
         $this->wishGames = $wishGames;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Channel>
+     */
+    public function getChannels(): Collection
+    {
+        return $this->channels;
+    }
+
+    public function addChannel(Channel $channel): self
+    {
+        if (!$this->channels->contains($channel)) {
+            $this->channels[] = $channel;
+            $channel->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannel(Channel $channel): self
+    {
+        if ($this->channels->removeElement($channel)) {
+            // set the owning side to null (unless already changed)
+            if ($channel->getSender() === $this) {
+                $channel->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Channel>
+     */
+    public function getChannelsReceived(): Collection
+    {
+        return $this->channels_received;
+    }
+
+    public function addChannelsReceived(Channel $channelsReceived): self
+    {
+        if (!$this->channels_received->contains($channelsReceived)) {
+            $this->channels_received[] = $channelsReceived;
+            $channelsReceived->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannelsReceived(Channel $channelsReceived): self
+    {
+        if ($this->channels_received->removeElement($channelsReceived)) {
+            // set the owning side to null (unless already changed)
+            if ($channelsReceived->getReceiver() === $this) {
+                $channelsReceived->setReceiver(null);
+            }
+        }
 
         return $this;
     }
