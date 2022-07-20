@@ -2,19 +2,20 @@
 
 namespace App\Entity;
 
+use App\Filter\CountFilter;
+use App\Filter\ExchangeFilter;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ExchangeRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ExchangeCancelController;
 use App\Controller\ExchangeRefuseController;
 use App\Controller\ExchangeConfirmController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
-use App\Filter\ExchangeFilter;
-use App\Filter\CountFilter;
 
 
 
@@ -66,6 +67,23 @@ use App\Filter\CountFilter;
             ],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
+        ],
+        'cancel' => [
+            'method' => 'PATCH',
+            'path' => '/exchanges/{id}/cancel',
+            'controller' => ExchangeCancelController::class,
+            'openapi_context' => [
+                'summary' => 'cancel an exchange',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+            "security" => "is_granted('cancel', object)",
+            "security_message" => "Only admins or Owner can cancel this exchange."
         ],
     ],
     collectionOperations: [

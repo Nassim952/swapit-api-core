@@ -1,12 +1,12 @@
 <?php
 
-namespace App\EventSubscriber;
+namespace App\EventListener;
 
 use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class JWTCreatedListener implements EventSubscriberInterface
+class JWTSubscriber implements EventSubscriberInterface
 {
     public function onLexikJwtAuthenticationOnJwtCreated(JWTCreatedEvent $event)
     {
