@@ -90,7 +90,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ApiFilter(PropertyFilter::class)]
 #[ApiFilter(UserFilter::class)]
 #[ApiFilter(CountFilter::class)]
-#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'ownGames' => 'exact', 'wishGames' => 'exact', 'resetTokenPassword' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'ownGames' => 'partial', 'wishGames' => 'partial', 'resetTokenPassword' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
