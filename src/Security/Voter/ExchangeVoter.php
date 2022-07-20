@@ -20,10 +20,11 @@ class ExchangeVoter extends Voter
     const VIEW = 'view';
     const EDIT = 'edit';
     const DELETE = 'delete';
+    const CANCEL = 'cancel';
 
     protected function supports(string $attribute, $subject): bool
     {
-        $supportsAttribute = in_array($attribute, [self::VIEW, self::EDIT, self::DELETE]);
+        $supportsAttribute = in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::CANCEL]);
         $supportsSubject = $subject instanceof Exchange;
 
         return $supportsAttribute && $supportsSubject;
@@ -55,6 +56,8 @@ class ExchangeVoter extends Voter
                 return $this->canEdit($Exchange, $user);
             case self::DELETE:
                 return $this->canDelete($Exchange, $user);
+            case self::CANCEL:
+                return $this->canCancel($Exchange, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -74,6 +77,12 @@ class ExchangeVoter extends Voter
     {
         // this assumes that the Exchange object has a `getOwner()` method
         return ($Exchange->getOwner() == $user || $this->security->isGranted('ROLE_ADMIN'));
+    }
+
+    private function canCancel(Exchange $Exchange, User $user): bool
+    {
+        // this assumes that the Exchange object has a `getOwner()` method
+        return ($Exchange->getProposer() == $user || $this->security->isGranted('ROLE_ADMIN'));
     }
 
     private function canDelete(Exchange $Exchange, User $user): bool

@@ -32,8 +32,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     itemOperations: [
         'get' => [
             'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']],
-            // "security" => "is_granted('view', object)",
-            // "security_message" => "Only Admin or Owner can view this resource."
+            "security" => "is_granted('view', object)",
+            "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
             "security" => "is_granted('edit', object)",
