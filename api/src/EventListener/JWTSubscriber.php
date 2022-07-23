@@ -14,6 +14,7 @@ class JWTSubscriber implements EventSubscriberInterface
         $user = $event->getUser();
         if($user instanceof User){
             $data['id'] = $user->getId();
+            $data['mail_confirmed'] = $user->getIsMailConfirmed();
         }
         $event->setData($data);
     }
