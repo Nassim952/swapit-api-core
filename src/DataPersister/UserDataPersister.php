@@ -31,6 +31,10 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
         //     $data->eraseCredentials();
         // }
 
+        if($data->getIsMailConfirmed() == null){
+            $data->setIsMailConfirmed(false);
+        }
+
         if ($data->getPassword() && !preg_match('/^\$2y/', $data->getPassword())) {
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
             $data->eraseCredentials();
