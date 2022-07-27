@@ -183,7 +183,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'write:User:item'])]
     private $channels_received;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[ORM\Column(type: 'boolean', nullable: false)]
     #[Groups(['read:User:item', 'write:User:item'])]
     private $isMailConfirmed = false;
 
