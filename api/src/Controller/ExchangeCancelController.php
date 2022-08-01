@@ -6,9 +6,7 @@ use App\Entity\Exchange;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
 
-class ExchangeRefuseController
-{
-
+class ExchangeCancelController{
     public function __invoke(Exchange $data, MailerInterface $mailer): Exchange
     {
 
@@ -18,15 +16,15 @@ class ExchangeRefuseController
         $email = (new Email())
             ->from('swapit.esgi@gmail.com')
             ->to($data->getOwner()->getEmail())
-            ->subject('Confirmation de votre refus')
-            ->text('L\'échange a bien été refusée !');
+            ->subject('L\'échange a été annulé !')
+            ->text($data->getProposer()->getUsername() . ' a annulé sa demande d\'échange !');
 
         // le proposer reçoit l'échange
         $emailToProposer = (new Email())
             ->from('swapit.esgi@gmail.com')
             ->to($data->getProposer()->getEmail())
-            ->subject($data->getOwner()->getUsername() . ' a refusé votre demande d\'échange !')
-            ->text('L\'échange a été refusée...');
+            ->subject(' L\'échange a bien été annulé !')
+            ->text('Votre échange avec ' . $data->getOwner()->getUsername() . ' a été annulé !');
         
         $mailer->send($email);
         $mailer->send($emailToProposer);

@@ -10,7 +10,7 @@ use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
 use App\lib\IgdbBundle\IgdbWrapper;
 
-final class UserFilter extends AbstractContextAwareFilter
+final class CountFilter extends AbstractContextAwareFilter
 {
     protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, string $operationName = null)
     {
@@ -30,19 +30,12 @@ final class UserFilter extends AbstractContextAwareFilter
         $parameterName = $queryNameGenerator->generateParameterName($property); // Generate a unique parameter name to avoid collisions with other filters
  
 
-        // if ($property  == 'ids') {
-        //     $queryBuilder = $queryBuilder->where("$alias.id IN (:$parameterName)")
-        //         ->setParameter($parameterName, $value);
-        // }
-
-        // if($property  == 'ownGames' || $property  == 'wishGames'){
-        //     $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.$property)")
-        //         ->setParameter($parameterName, $value);
-        // }
-
-        if($property  == 'involved_companies'){
-            $queryBuilder =  $queryBuilder->Join("$alias.$property", 'ge')->andWhere("ge.id IN (:$parameterName)")
-                ->setParameter($parameterName, $value);
+        if($property == 'count') {
+            if ($value) {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->Join("$alias.$value", 'e')->groupBy("$alias.id");
+            } else {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->groupBy("$alias.id");
+            }
         }
     }
 

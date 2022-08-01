@@ -3,53 +3,33 @@
 namespace App\Controller;
 
 use App\Entity\Exchange;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 
-class ExchangeConfirmController{
+class ExchangeConfirmController
+{
 
-    public function __invoke(Exchange $data): Exchange {
-        // if($data->getConfirmed() !== null){
-        //     // return $this->redirectToRoute('home');
-        // }
+    public function __invoke(Exchange $data, MailerInterface $mailer): Exchange
+    {
         $data->setConfirmed(true);
 
-        // $messageConfirmReceiver = (new \Swift_Message('Votre confirmation de swap a bien été prise en compte !'))
-        //     ->setFrom('swapit.esgi@gmail.com')
-        //     ->setTo($data->getUserOwner()->getEmail())
-        //     ->setBody(
-        //         $this->renderView(
-        //             'mail/swap_confirmation_to_owner.html.twig',
-        //             [
-        //                 'exchange' => $data,
-        //                 'user' => $data->getUserProposer(),
-        //                 'ownerGame' => $data->getOwnerGame(),
-        //                 'selected_game' => $data->getGame(),
-        //                 'owner' => $data->getUserOwner()
-        //             ]
-        //             ),
-        //             'text/html'
-        //         );
-                
-        // $mailer->send($messageConfirmReceiver);
+        // l'owner reçoit l'échange
+        $emailToOwner = (new Email())
+            ->from('swapit.esgi@gmail.com')
+            ->to($data->getOwner()->getEmail())
+            ->subject('Confirmation de votre demande')
+            ->text('L\'échange a bien été acceptée, amusez-vous bien avec votre prochain nouveau jeu !');
 
-        // $messageConfirmProposer = (new \Swift_Message('Votre demande de swap a bien été validée !'))
-        //     ->setFrom('swapit.esgi@gmail.com')
-        //     ->setTo($data->getUserProposer()->getEmail())
-        //     ->setBody(
-        //         $this->renderView(
-        //             'mail/swap_confirmation_to_proposer.html.twig',
-        //             [
-        //                 'exchange' => $data,
-        //                 'user' => $data->getUserProposer(),
-        //                 'ownerGame' => $data->getOwnerGame(),
-        //                 'selected_game' => $data->getGame(),
-        //                 'owner' => $data->getUserOwner()
-        //             ]
-        //             ),
-        //             'text/html'
-        //         );
-                
-        // $mailer->send($messageConfirmProposer);
-    
+        // le proposer reçoit l'échange
+        $emailToProposer = (new Email())
+            ->from('swapit.esgi@gmail.com')
+            ->to($data->getProposer()->getEmail())
+            ->subject($data->getOwner()->getUsername() . ' a accepté votre demande d\'échange !')
+            ->text('L\'échange a été acceptée, amusez-vous bien avec votre prochain nouveau jeu !');
+
+        $mailer->send($emailToOwner);
+        $mailer->send($emailToProposer);
+
         return $data;
     }
 }
