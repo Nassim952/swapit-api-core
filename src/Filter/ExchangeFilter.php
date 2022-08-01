@@ -10,7 +10,7 @@ use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
 use App\lib\IgdbBundle\IgdbWrapper;
 
-final class UserFilter extends AbstractContextAwareFilter
+final class ExchangeFilter extends AbstractContextAwareFilter
 {
     protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, string $operationName = null)
     {
@@ -30,20 +30,14 @@ final class UserFilter extends AbstractContextAwareFilter
         $parameterName = $queryNameGenerator->generateParameterName($property); // Generate a unique parameter name to avoid collisions with other filters
  
 
-        // if ($property  == 'ids') {
-        //     $queryBuilder = $queryBuilder->where("$alias.id IN (:$parameterName)")
-        //         ->setParameter($parameterName, $value);
-        // }
-
-        // if($property  == 'ownGames' || $property  == 'wishGames'){
-        //     $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.$property)")
-        //         ->setParameter($parameterName, $value);
-        // }
-
-        if($property  == 'involved_companies'){
-            $queryBuilder =  $queryBuilder->Join("$alias.$property", 'ge')->andWhere("ge.id IN (:$parameterName)")
-                ->setParameter($parameterName, $value);
+        if ($property  == 'pending') {
+            $queryBuilder = $queryBuilder->where("$alias.confirmed IS NULL");  
         }
+
+        if ($property  == 'answered') {
+            $queryBuilder = $queryBuilder->where("$alias.confirmed IS FALSE")->orWhere("$alias.confirmed IS TRUE");;  
+        }
+
     }
 
     // This function is only used to hook in documentation generators (supported by Swagger and Hydra)
