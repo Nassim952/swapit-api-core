@@ -18,7 +18,7 @@ class ExchangeConfirmController
             ->from('swapit.esgi@gmail.com')
             ->to($data->getOwner()->getEmail())
             ->subject('Confirmation de votre demande')
-            ->text('L\'échange a bien été acceptée, amusez-vous bien avec votre prochain nouveau jeu !');
+            ->text('L\'échange avec' . $data->getProposer()->getUsername() . ' a bien été acceptée, amusez-vous bien avec votre nouveau jeu !');
 
         // le proposer reçoit l'échange
         $emailToProposer = (new Email())

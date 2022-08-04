@@ -21,7 +21,9 @@ use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Controller\UserGenerateTokenPasswordController;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Controller\UserSetMailConfirmedToTrueController;
 use App\Controller\UserSetPasswordTokenToNullController;
+use App\Controller\UserSendMailForConfirmationController;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -64,6 +66,36 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             'controller' => UserSetPasswordTokenToNullController::class,
             'openapi_context' => [
                 'summary' => 'set token reset password to null',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'send-mail-for-confirmation' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/send-mail-for-confirmation',
+            'controller' => UserSendMailForConfirmationController::class,
+            'openapi_context' => [
+                'summary' => 'send mail for confirmation',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'set-mail-confirmed-to-true' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/set-mail-confirmed-to-true',
+            'controller' => UserSetMailConfirmedToTrueController::class,
+            'openapi_context' => [
+                'summary' => 'set mail confirmed to true',
                 'requestBody' => [
                     'content' => [
                         'application/json' => [
@@ -151,12 +183,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'write:User:item'])]
     private $channels_received;
 
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $isMailConfirmed = false;
+
     public function __construct()
     {
         $this->receivedExchanges = new ArrayCollection();
         $this->sendExchanges = new ArrayCollection();
         $this->channels = new ArrayCollection();
         $this->channels_received = new ArrayCollection();
+    }
+
+    public function getIsMailConfirmed(): ?bool
+    {
+        return $this->isMailConfirmed;
+    }
+
+    public function setIsMailConfirmed(?bool $isMailConfirmed): self
+    {
+        $this->isMailConfirmed = $isMailConfirmed;
+
+        return $this;
     }
 
     public function getId(): ?int

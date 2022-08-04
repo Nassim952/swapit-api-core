@@ -19,7 +19,7 @@ class ExchangeRefuseController
             ->from('swapit.esgi@gmail.com')
             ->to($data->getOwner()->getEmail())
             ->subject('Confirmation de votre refus')
-            ->text('L\'échange a bien été refusée !');
+            ->text('L\'échange avec ' . $data->getProposer()->getUsername() . ' a été refusé.');
 
         // le proposer reçoit l'échange
         $emailToProposer = (new Email())
