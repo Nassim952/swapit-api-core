@@ -30,7 +30,7 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
         //     $data->setResetTokenPassword('null');
         //     $data->eraseCredentials();
         // }
-
+        
         if ($data->getPassword() && !preg_match('/^\$2y/', $data->getPassword())) {
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
             $data->eraseCredentials();
