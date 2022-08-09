@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Channel;
-use App\Filter\Userfilter;
+use App\Filter\UserFilter;
 
 use App\Filter\CountFilter;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,8 +16,9 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\Controller\UserSendMailForContactController;
 
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Controller\UserGenerateTokenPasswordController;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -81,6 +82,21 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             'controller' => UserSendMailForConfirmationController::class,
             'openapi_context' => [
                 'summary' => 'send mail for confirmation',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'send-mail-for-contact' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/send-mail-for-contact',
+            'controller' => UserSendMailForContactController::class,
+            'openapi_context' => [
+                'summary' => 'send mail for contact',
                 'requestBody' => [
                     'content' => [
                         'application/json' => [
