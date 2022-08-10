@@ -31,6 +31,8 @@ use App\Controller\UserSendMailForConfirmationController;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+use Symfony\Component\Serializer\Annotation\MaxDepth;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
@@ -38,8 +40,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         'get' => [
             'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item']],
             "security" => "is_granted('view', object)",
-            "security_message" => "Only Admin or Owner can view this resource.",
-            "enable_max_depth" => true,
+            "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
             'denormalization_context' => ['groups' => ['patch:User:item']],
@@ -178,18 +179,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'patch:User:item'])]
     private $resetTokenPassword;
 
+    /**
+     * @MaxDepth(1)
+     */
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource(
-        maxDepth: 1,
-    )]
+    #[ApiSubresource]
     private $receivedExchanges;
 
+    /**
+     * @MaxDepth(1)
+     */
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'proposer', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource(
-        maxDepth: 1,
-    )]
+    #[ApiSubresource]
     private $sendExchanges;
 
     #[ORM\Column(type: 'array', nullable: true)]
@@ -200,17 +203,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $wishGames = [];
 
+    /**
+     * @MaxDepth(1)
+     */
     #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Notification::class, orphanRemoval: true)]
-    #[ApiSubresource(
-        maxDepth: 1,
-    )]
+    #[ApiSubresource]
     #[Groups(['read:User:item'])]
     private $notifications;
 
+    /**
+     * @MaxDepth(1)
+     */
     #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
-    #[ApiSubresource(
-        maxDepth: 1,
-    )]
+    #[ApiSubresource]
     #[Groups(['read:User:item'])]
     private $channels;
     
