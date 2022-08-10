@@ -5,12 +5,14 @@ namespace App\DataPersister;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use App\Entity\Exchange;
+use App\Entity\Notification;
 use Symfony\Component\Security\Core\Security;
 
 class ExchangeDataPersister implements ContextAwareDataPersisterInterface
 {
 
     private $entityManager;
+    private $security;
 
     public function __construct(EntityManagerInterface $entityManager, Security $security)
     {
@@ -25,36 +27,44 @@ class ExchangeDataPersister implements ContextAwareDataPersisterInterface
 
     public function persist($data, array $context = [])
     {
-        // $data->setOwner($data->getOwner());
-        // $data->setProposer($data->getProposer());
-        // $data->setProposerGame($data->getProposerGame());
-        // $data->setSenderGame($data->getSenderGame());
-        // $data->setConfirmed(null);
-
-        // dd($context);
-
         if (isset($context["collection_operation_name"]) && $context["collection_operation_name"]  == 'post') {
+            
             $user = $this->security->getUser();
+            $data->setProposer($user);
             // faire un retour msg permission denied
-            if ($data->getProposer() == $user) {
+            if ($data->getOwner() != $user ) {
                 $this->entityManager->persist($data);
                 $this->entityManager->flush();
+
+                $this->createNotification($data);
             }
         } else {
             $this->entityManager->persist($data);
             $this->entityManager->flush();
+
+            $this->createNotification($data);
         }
-
-        // dd($context);
-
-        // elseif ($data->getOwner($user)) {
-
-        // }
     }
 
     public function remove($data, array $context = [])
     {
         $this->entityManager->remove($data);
         $this->entityManager->flush();
+    }
+
+    public function createNotification($data, array $context = [])
+    {
+        $notification = new Notification();
+        $notification->setRefTable('Exchange');
+        $notification->setCreatedAt(new \DateTimeImmutable());
+        $notification->setIdTable($data->getId());
+        $notification->setReceiver($data->getOwner());
+        $notification->setSender($data->getProposer());
+        $notification->setDescription('Nouvelle demande d\'echange de '.$data->getProposer()->getUsername().'.');
+
+        if ($data->getOwner() == $this->security->getUser()) {
+            $this->entityManager->persist($notification);
+            $this->entityManager->flush();
+        }  
     }
 }
