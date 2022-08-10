@@ -38,7 +38,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         'get' => [
             'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item']],
             "security" => "is_granted('view', object)",
-            "security_message" => "Only Admin or Owner can view this resource."
+            "security_message" => "Only Admin or Owner can view this resource.",
+            "enable_max_depth" => true,
         ],
         'patch' => [
             'denormalization_context' => ['groups' => ['patch:User:item']],
