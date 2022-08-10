@@ -54,13 +54,18 @@ class ChannelRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Channel
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+   public function findOneBySubscribers($subscribers): ?Channel
+   {
+    $usersId = array_map(function($user){
+        return $user->getId();
+    }, $subscribers);
+
+       return $this->createQueryBuilder('c')
+            ->join('c.subscribers', 'u')
+            ->where('u.id IN (:usersId)')
+            ->setParameter('usersId', $usersId)
+            ->getQuery()
+            ->getOneOrNullResult()
+       ;
+   }
 }

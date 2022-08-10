@@ -8,14 +8,23 @@ use App\Repository\ChannelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
+
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+// use App\Entity\Message;
 
 #[ORM\Entity(repositoryClass: ChannelRepository::class)]
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:sender:collection', 'read:receiver:collection', 'read:Channel:collection', 'read:Channel:item']]
+            'normalization_context' => ['groups' => ['read:Channel:collection', 'read:Channel:item']],
+            "security" => "is_granted('view', object)",
         ],
         'patch' => [
+            'denormalization_context' => ['groups' => ['patch:Channel:item']],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or channel members can patch."
         ],
@@ -26,36 +35,56 @@ use Doctrine\ORM\Mapping as ORM;
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Channel:collection']]
+            'normalization_context' => ['groups' => ['read:Channel:collection']],
+            "security" => "is_granted('ROLE_ADMIN')",
         ],
-        'post'
-    ]
+        'post' => [
+            'denormalization_context' => ['groups' => ['post:Channel:collection']],
+            "security" => "is_granted('ROLE_USER')",
+            "security_message" => "Only admins or user can post."
+        ],
+    ],
+    subresourceOperations: [
+        'api_users_channel_get_subresource' => [
+            'method' => 'GET',
+            'normalization_context' => [
+                'groups' => ['read:User:item'],
+            ],
+        ],
+    ],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'subscribers' => 'exact', 'name' => 'partial'])]
 class Channel
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['read:Channel:collection','read:User:item'])]
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['read:Channel:collection','post:Channel:collection', 'read:User:item'])]
     private $name;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'channels')]
-    #[ORM\JoinColumn(nullable: false)]
-    private $sender;
-
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'channels_received')]
-    #[ORM\JoinColumn(nullable: false)]
-    private $receiver;
-
     #[ORM\OneToMany(mappedBy: 'channel', targetEntity: Message::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[Groups(['read:Channel:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $messages;
+
+    #[Assert\NotBlank]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'channels')]
+    #[Groups(['read:Channel:item', 'post:Channel:collection'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
+    private $subscribers;
 
     public function __construct()
     {
         $this->messages = new ArrayCollection();
+        $this->subscribers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,30 +100,6 @@ class Channel
     public function setName(string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getSender(): ?User
-    {
-        return $this->sender;
-    }
-
-    public function setSender(?User $sender): self
-    {
-        $this->sender = $sender;
-
-        return $this;
-    }
-
-    public function getReceiver(): ?User
-    {
-        return $this->receiver;
-    }
-
-    public function setReceiver(?User $receiver): self
-    {
-        $this->receiver = $receiver;
 
         return $this;
     }
@@ -128,4 +133,57 @@ class Channel
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getSubscribers(): Collection
+    {
+        return $this->subscribers;
+    }
+
+    public function addSubscriber(User $subscriber): self
+    {
+        if (!$this->subscribers->contains($subscriber)) {
+            $this->subscribers[] = $subscriber;
+        }
+
+        return $this;
+    }
+
+    public function removeSubscriber(User $subscriber): self
+    {
+        $this->subscribers->removeElement($subscriber);
+
+        return $this;
+    }
+
+    #[Groups(['read:Channel:collection'])]
+    public function getLastMessage(): ?array
+    {
+        $lastMessage = $this->messages->last();
+        if ($lastMessage) {
+            return [
+                'id' => $lastMessage->getId(),
+                'content' => $lastMessage->getContent(),
+                'createdDate' => strtotime($lastMessage->getCreatedDate()->format('Y-m-d H:i:s')) < strtotime('-30 days') ? $lastMessage->getCreatedDate()->format('Y-m-d H:i:s') : $lastMessage->getCreatedDate()->format('H:i:s'),
+                'author' => [
+                    'id' => $lastMessage->getAuthor()->getId(),
+                    'username' => $lastMessage->getAuthor()->getUsername(),
+                ],
+            ];
+        }
+        return null;
+    }
+    // {
+    //     $lastMessage = null;
+    //     foreach ($this->getMessages() as $message) {
+    //         if ($lastMessage === null || $message->getCreatedDate() > $lastMessage->getCreatedDate()) {
+    //             $lastMessage = $message;
+    //         }
+    //     }
+    //     // $lastMessage = new Message($lastMessage);
+        
+    //     return $lastMessage;
+    // }
 }

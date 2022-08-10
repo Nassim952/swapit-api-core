@@ -67,18 +67,18 @@ class ChannelVoter extends Voter
             return true;
         }
         // the Channel object could have, for example, a method `isPrivate()`
-        return ($channel->getSender() == $user || $channel->getReceiver() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return (in_array($user, $channel->getSubscribers()->toArray()));
     }
 
     private function canEdit(Channel $channel, User $user): bool
     {
         // this assumes that the Channel object has a `getOwner()` method
-        return ($channel->getSender() == $user || $channel->getReceiver() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return (in_array($user, $channel->getSubscribers()->toArray()));
     }
 
     private function canDelete(Channel $channel, User $user): bool
     {
         // this assumes that the Channel object has a `getOwner()` method
-        return ($channel->getSender() == $user || $channel->getReceiver() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return (in_array($user, $channel->getSubscribers()->toArray()));
     }
 }
