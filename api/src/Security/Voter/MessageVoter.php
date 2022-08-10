@@ -67,18 +67,31 @@ class MessageVoter extends Voter
             return true;
         }
         // the Message object could have, for example, a method `isPrivate()`
-        return ($message->getChannel()->getSender() == $user || $message->getChannel()->getReceiver() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return $this->isSubscriber($message, $user);
     }
 
     private function canEdit(Message $message, User $user): bool
     {
         // this assumes that the Message object has a `getOwner()` method
-        return ($message->getAuthor() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return ($message->getAuthor() == $user);
     }
 
     private function canDelete(Message $message, User $user): bool
     {
         // this assumes that the Message object has a `getOwner()` method
-        return ($message->getAuthor() == $user || $this->security->isGranted('ROLE_ADMIN'));
+        return ($message->getAuthor() == $user);
+    }
+
+    private function isSubscriber(Message $message, User $user): bool
+    {
+        $usersIds = array_map(function ($user) {
+            return $user->getId();
+        }, $channel->getSubscribers()->toArray()); 
+        
+        // $usersIds = $message->getChannel()->getSubscribers()->map(function (User $user) {
+        //     return $user->getId();
+        // })->toArray();
+        // return in_array($user->getId(), $usersIds);
+        return true;
     }
 }
