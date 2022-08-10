@@ -14,8 +14,8 @@ use App\Controller\ExchangeConfirmController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
-use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
@@ -23,7 +23,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection']]
+            'normalization_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection']]
         ],
         'patch' => [
             'denormalization_context' => ['groups' => ['patch:Exchange:item']],
@@ -88,10 +88,11 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection']]
+            "security" => "is_granted('ROLE_ADMIN')",
+            'normalization_context' => ['groups' => ['read:Exchange:collection']]
         ],
         'post' => [
-            'denormalization_context' => ['groups' => ['write:Exchange:item']]
+            'denormalization_context' => ['groups' => ['post:Exchange:collection']],
         ],
     ]
 )]
@@ -114,20 +115,20 @@ class Exchange
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'sendExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $proposer;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $proposerGame;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $senderGame;
 
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['patch:Exchange:item', 'read:Exchange:collection'])]
     private $confirmed;
 
     public function getId(): ?int
