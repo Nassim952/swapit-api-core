@@ -13,7 +13,7 @@ use ApiPlatform\Core\Action\NotFoundAction;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:Message:collection', 'read:Message:item']],
+            'normalization_context' => ['groups' => ['read:Message:collection', 'read:Message:item'], 'enable_max_depth' => true],
             "security" => "is_granted('view', object)",
         ],
         'delete' => [
@@ -23,10 +23,7 @@ use ApiPlatform\Core\Action\NotFoundAction;
     ],
     collectionOperations: [
         'post' => [
-            'denormalization_context' => ['groups' => ['post:Message:collection']],
-            
-            // "security" => "is_granted('canCreate', object)",
-            // "security_message" => "Only subscribers can create message." 
+            'denormalization_context' => ['groups' => ['post:Message:collection'], 'enable_max_depth' => true],
         ],
     ],
     subresourceOperations: [
