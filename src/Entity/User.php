@@ -3,20 +3,24 @@
 namespace App\Entity;
 
 use App\Entity\Channel;
-use App\Filter\Userfilter;
+use App\Filter\UserFilter;
 
 use App\Filter\CountFilter;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
+
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+
 
 use ApiPlatform\Core\Annotation\ApiResource;
 
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
+
 use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Controller\UserGenerateTokenPasswordController;
@@ -24,20 +28,23 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use App\Controller\UserSetMailConfirmedToTrueController;
 use App\Controller\UserSetPasswordTokenToNullController;
 use App\Controller\UserSendMailForConfirmationController;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
             "security" => "is_granted('view', object)",
             "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
+            'denormalization_context' => ['groups' => ['patch:User:item'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only Admin or Owner can patch."
         ],
@@ -90,6 +97,21 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
                 ]
             ],
         ],
+        'send-mail-for-contact' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/send-mail-for-contact',
+            'controller' => UserSendMailForContactController::class,
+            'openapi_context' => [
+                'summary' => 'send mail for contact',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
         'set-mail-confirmed-to-true' => [
             'method' => 'PATCH',
             'path' => '/users/{id}/set-mail-confirmed-to-true',
@@ -109,13 +131,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:User:collection']],
+            'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
             "security" => "is_granted('ROLE_ADMIN')",
             "security_message" => "Only Admin or Owner can view this resource."
         ],
         'post' => [
-            // "security" => "is_granted('postAdmin', object)",
-            // "security_message" => "Only admin can create Admin users."
+            'denormalization_context' => ['groups' => ['post:User:collection'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
         ],
     ]
 )]
@@ -128,83 +150,86 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['read:User:collection'])]
+    #[Groups(['read:User:collection','read:Channel:collection','read:Channel:item'])]
     private $id;
 
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['read:User:collection', 'write:User:item'])]
+    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item'])]
     private $username;
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['write:User:item', 'read:User:item', 'patch:User:item'])]
+    #[Groups(['post:User:collection', 'patch:User:item'])]
     private $password;
 
     #[Assert\Email]
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
     private $email;
 
     #[ORM\Column(type: 'json')]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
     private $roles = ["ROLE_USER"];
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['read:User:item', 'patch:User:item'])]
     private $resetTokenPassword;
 
-    #[Groups(['read:User:item', 'patch:User:item'],)]
+    /**
+     * @MaxDepth(1)
+     */
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $receivedExchanges;
 
-    #[Groups(['read:User:item', 'patch:User:item'])]
+  
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'proposer', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $sendExchanges;
 
     #[ORM\Column(type: 'array', nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $ownGames = [];
 
     #[ORM\Column(type: 'array', nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $wishGames = [];
 
-    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Channel::class, orphanRemoval: true)]
-    #[ApiSubresource]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    /**
+     * @MaxDepth(1)
+     */
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Notification::class, orphanRemoval: true)]
+    #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
+    private $notifications;
+
+    /**
+     * @MaxDepth(1)
+     */
+    #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
+    #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $channels;
-
-    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Channel::class, orphanRemoval: true)]
-    #[ApiSubresource]
-    #[Groups(['read:User:item', 'write:User:item'])]
-    private $channels_received;
-
-    #[ORM\Column(type: 'boolean', nullable: false)]
-    #[Groups(['read:User:item', 'write:User:item'])]
-    private $isMailConfirmed = false;
-
+    
     public function __construct()
     {
         $this->receivedExchanges = new ArrayCollection();
         $this->sendExchanges = new ArrayCollection();
         $this->channels = new ArrayCollection();
         $this->channels_received = new ArrayCollection();
-    }
-
-    public function getIsMailConfirmed(): ?bool
-    {
-        return $this->isMailConfirmed;
-    }
-
-    public function setIsMailConfirmed(?bool $isMailConfirmed): self
-    {
-        $this->isMailConfirmed = $isMailConfirmed;
-
-        return $this;
     }
 
     public function getId(): ?int
@@ -407,6 +432,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     }
 
     /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): self
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications[] = $notification;
+            $notification->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): self
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getReceiver() === $this) {
+                $notification->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Channel>
      */
     public function getChannels(): Collection
@@ -418,7 +473,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     {
         if (!$this->channels->contains($channel)) {
             $this->channels[] = $channel;
-            $channel->setSender($this);
+            $channel->addSubscriber($this);
         }
 
         return $this;
@@ -427,40 +482,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function removeChannel(Channel $channel): self
     {
         if ($this->channels->removeElement($channel)) {
-            // set the owning side to null (unless already changed)
-            if ($channel->getSender() === $this) {
-                $channel->setSender(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Channel>
-     */
-    public function getChannelsReceived(): Collection
-    {
-        return $this->channels_received;
-    }
-
-    public function addChannelsReceived(Channel $channelsReceived): self
-    {
-        if (!$this->channels_received->contains($channelsReceived)) {
-            $this->channels_received[] = $channelsReceived;
-            $channelsReceived->setReceiver($this);
-        }
-
-        return $this;
-    }
-
-    public function removeChannelsReceived(Channel $channelsReceived): self
-    {
-        if ($this->channels_received->removeElement($channelsReceived)) {
-            // set the owning side to null (unless already changed)
-            if ($channelsReceived->getReceiver() === $this) {
-                $channelsReceived->setReceiver(null);
-            }
+            $channel->removeSubscriber($this);
         }
 
         return $this;
