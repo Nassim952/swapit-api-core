@@ -5,49 +5,69 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\MessageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Action\NotFoundAction;
 
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:message:collection', 'read:message:item']]
-        ],
-        'patch' => [
-            "security" => "is_granted('edit', object)",
-            "security_message" => "Only admins or author can patch."
+            'normalization_context' => ['groups' => ['read:Message:collection', 'read:Message:item'], 'enable_max_depth' => true],
+            "security" => "is_granted('view', object)",
         ],
         'delete' => [
-            "security" => "is_granted('delete', object)",
-            "security_message" => "Only admins or author can delete."
+            "security" => "object.getAuthor() == user",
+            "security_message" => "Only admins or author can delete."   
         ],
     ],
     collectionOperations: [
-        'get' => [
-            'normalisation_context' => ['groups' => ['read:message:collection']]
+        'post' => [
+            'denormalization_context' => ['groups' => ['post:Message:collection'], 'enable_max_depth' => true],
         ],
-        'post'
-    ]
+    ],
+    subresourceOperations: [
+        'api_channels_message_get_subresource' => [
+            'method' => 'GET',
+            'normalization_context' => [
+                'groups' => ['read:Channel:item'],
+            ],
+        ],
+    ],
 )]
 class Message
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['read:Channel:item','read:Channel:collection','read:Message:item','read:Message:collection','read:User:item'])]
     private $id;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: 'text')]
+    #[Groups(['read:Channel:item','post:Message:collection','read:Channel:collection'])]
     private $content;
 
+    #[Assert\NotBlank]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['read:Channel:item','post:Message:collection','read:Channel:collection'])]
     private $author;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private $createdAt;
-
+    #[Assert\NotBlank]
     #[ORM\ManyToOne(targetEntity: Channel::class, inversedBy: 'messages')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['post:Message:collection'])]
     private $channel;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s'])]
+    #[Groups(['read:Channel:item','post:Message:collection','read:Channel:collection'])]
+    private $createdDate;
+
+    // #[ORM\Column(type: 'datetime')]
+    // #[Groups(['read:Channel:item','post:Message:collection','read:Channel:collection'])]
+    // private $createdAt;
 
     public function getId(): ?int
     {
@@ -78,18 +98,6 @@ class Message
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getChannel(): ?Channel
     {
         return $this->channel;
@@ -98,6 +106,30 @@ class Message
     public function setChannel(?Channel $channel): self
     {
         $this->channel = $channel;
+
+        return $this;
+    }
+
+    // public function getCreatedAt(): ?\DateTimeInterface
+    // {
+    //     return $this->createdAt;
+    // }
+
+    // public function setCreatedAt(\DateTimeInterface $createdAt): self
+    // {
+    //     $this->createdAt = $createdAt;
+
+    //     return $this;
+    // }
+
+    public function getCreatedDate(): ?\DateTimeInterface
+    {
+        return $this->createdDate;
+    }
+
+    public function setCreatedDate(\DateTimeInterface $createdDate): self
+    {
+        $this->createdDate = $createdDate;
 
         return $this;
     }

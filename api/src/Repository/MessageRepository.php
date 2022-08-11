@@ -39,6 +39,18 @@ class MessageRepository extends ServiceEntityRepository
         }
     }
 
+    public function findLastByChannel($channelId, $limit = 10): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.channel = :channelId')
+            ->setParameter('channelId', $channelId)
+            ->orderBy('m.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    
 //    /**
 //     * @return Message[] Returns an array of Message objects
 //     */

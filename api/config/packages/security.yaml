@@ -44,6 +44,30 @@ security:
             provider: users
             jwt: ~
 
+        channels:
+            pattern: ^/channels
+            stateless: true
+            lazy: true
+            methods: [POST, GET, PATCH, DELETE]
+            provider: users
+            jwt: ~
+
+        messages:
+            pattern: ^/messages
+            stateless: true
+            lazy: true
+            methods: [POST, GET, DELETE]
+            provider: users
+            jwt: ~
+
+        notifications:
+            pattern: ^/notifications
+            stateless: true
+            lazy: true
+            methods: [GET, DELETE]
+            provider: users
+            jwt: ~
+
         api:
             pattern: ^/api
             stateless: true
