@@ -218,6 +218,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ApiSubresource]
     #[Groups(['read:User:item'])]
     private $channels;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $isMailConfirmed = false;
     
     public function __construct()
     {
@@ -225,6 +229,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         $this->sendExchanges = new ArrayCollection();
         $this->channels = new ArrayCollection();
         $this->channels_received = new ArrayCollection();
+    }
+
+    public function getIsMailConfirmed(): ?bool
+    {
+        return $this->isMailConfirmed;
+    }
+
+    public function setIsMailConfirmed(?bool $isMailConfirmed): self
+    {
+        $this->isMailConfirmed = $isMailConfirmed;
+
+        return $this;
     }
 
     public function getId(): ?int
