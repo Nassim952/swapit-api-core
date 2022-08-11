@@ -20,7 +20,6 @@ use ApiPlatform\Core\Action\NotFoundAction;
         'delete' => [
             "security" => "object.getReceiver() == user",
             "security_message" => "Only admins or author can delete.",
-            'normalization_context' => ['groups' => ['delete:Notification:collection', 'delete:Notification:item']],
         ], 
     ],
     collectionOperations: [
@@ -49,11 +48,17 @@ class Notification
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'notifications')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $receiver;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $sender;
 
     #[ORM\Column(type: 'text')]

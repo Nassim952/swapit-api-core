@@ -38,13 +38,13 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item']],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
             "security" => "is_granted('view', object)",
             "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
-            'denormalization_context' => ['groups' => ['patch:User:item']],
-            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item']],
+            'denormalization_context' => ['groups' => ['patch:User:item'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only Admin or Owner can patch."
         ],
@@ -131,14 +131,13 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
     ],
     collectionOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:User:collection']],
+            'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
             "security" => "is_granted('ROLE_ADMIN')",
             "security_message" => "Only Admin or Owner can view this resource."
         ],
         'post' => [
-            'denormalization_context' => ['groups' => ['post:User:collection']],
-            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item']],
-            // "security_message" => "Only admin can create Admin users."
+            'denormalization_context' => ['groups' => ['post:User:collection'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
         ],
     ]
 )]
@@ -184,15 +183,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
      */
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $receivedExchanges;
 
-    /**
-     * @MaxDepth(1)
-     */
+  
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'proposer', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $sendExchanges;
 
     #[ORM\Column(type: 'array', nullable: true)]
@@ -207,16 +208,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
      * @MaxDepth(1)
      */
     #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Notification::class, orphanRemoval: true)]
-    #[ApiSubresource]
     #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $notifications;
 
     /**
      * @MaxDepth(1)
      */
     #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
-    #[ApiSubresource]
     #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $channels;
 
     #[ORM\Column(type: 'boolean', nullable: true)]

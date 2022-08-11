@@ -23,10 +23,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection']]
+            'normalization_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection'], 'enable_max_depth' => true]
         ],
         'patch' => [
-            'denormalization_context' => ['groups' => ['patch:Exchange:item']],
+            'denormalization_context' => ['groups' => ['patch:Exchange:item'], 'enable_max_depth' => true],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
         ],
@@ -89,10 +89,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     collectionOperations: [
         'get' => [
             "security" => "is_granted('ROLE_ADMIN')",
-            'normalization_context' => ['groups' => ['read:Exchange:collection']]
+            'normalization_context' => ['groups' => ['read:Exchange:collection'], 'enable_max_depth' => true]
         ],
         'post' => [
-            'denormalization_context' => ['groups' => ['post:Exchange:collection']],
+            'denormalization_context' => ['groups' => ['post:Exchange:collection'], 'enable_max_depth' => true],
         ],
     ]
 )]
@@ -111,11 +111,17 @@ class Exchange
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'receivedExchanges')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $owner;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'sendExchanges')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $proposer;
 
     #[ORM\Column(type: 'integer')]
