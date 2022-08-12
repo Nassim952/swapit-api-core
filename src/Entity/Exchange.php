@@ -110,7 +110,7 @@ class Exchange
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'receivedExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     #[ApiSubresource(
         maxDepth: 1,
     )]
@@ -134,7 +134,7 @@ class Exchange
 
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['patch:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $confirmed;
 
     public function getId(): ?int
