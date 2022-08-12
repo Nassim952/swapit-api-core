@@ -156,7 +156,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item'])]
+    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item', 'patch:User:item'])]
     private $username;
 
     #[Assert\NotBlank]
