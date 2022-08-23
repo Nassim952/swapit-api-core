@@ -9,6 +9,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Action\NotFoundAction;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 #[ApiResource(
     itemOperations: [
@@ -30,6 +34,7 @@ use ApiPlatform\Core\Action\NotFoundAction;
         ],
     ],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'idTable' => 'exact', 'refTable' => 'exact'])]
 class Notification
 {
     #[ORM\Id]

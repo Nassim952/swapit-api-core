@@ -4,10 +4,14 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
+
+use App\Repository\NotificationRepository;
 use App\Repository\ChannelRepository;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -59,7 +63,7 @@ class Channel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['read:Channel:collection','read:User:item'])]
+    #[Groups(['read:Channel:collection','read:User:item','read:Channel:item'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -92,6 +96,13 @@ class Channel
         return $this->id;
     }
 
+    public function setId($id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+    
     public function getName(): ?string
     {
         return $this->name;
@@ -175,15 +186,11 @@ class Channel
         }
         return null;
     }
-    // {
-    //     $lastMessage = null;
-    //     foreach ($this->getMessages() as $message) {
-    //         if ($lastMessage === null || $message->getCreatedDate() > $lastMessage->getCreatedDate()) {
-    //             $lastMessage = $message;
-    //         }
-    //     }
-    //     // $lastMessage = new Message($lastMessage);
-        
-    //     return $lastMessage;
-    // }
+
+    #[Groups(['read:Channel:collection'])]
+    public function getNotification(): ?array
+    {
+        $notification = (new NotificationRepository())->findOneByChannel($this->getId());
+        return $notification ? ['id' => $notification->getId(), 'receiver' => $notification->getReceiver()->getId()]: null;
+    }
 }
