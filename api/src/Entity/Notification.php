@@ -17,9 +17,8 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'controller' => NotFoundAction::class,
-            'read' => false,
-            'output' => false,
+            "security" => "object.getReceiver() == user",
+            "security_message" => "Only admins or author can get.",
         ],
         'delete' => [
             "security" => "object.getReceiver() == user",
@@ -60,7 +59,7 @@ class Notification
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['read:User:item'])]
+    #[Groups(['read:User:item','read:Notification:item'])]
     #[ApiSubresource(
         maxDepth: 1,
     )]
