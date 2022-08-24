@@ -41,10 +41,6 @@ class MessageDataPersister implements ContextAwareDataPersisterInterface
                 $this->entityManager->flush();
                 $this->initPusher($data);
                 $this->createNotification($data);
-                // $this->entityManager->persist($data);
-                // $this->entityManager->flush();
-                // $this->initPusher($data);
-                // $this->createNotification($data);
             }
         } else {
             $this->entityManager->persist($data);

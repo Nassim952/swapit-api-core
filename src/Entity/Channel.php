@@ -5,15 +5,15 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 
-use App\Repository\NotificationRepository;
 use App\Repository\ChannelRepository;
-
+use \Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\Controller\ChannelNotficationController;
 
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
@@ -36,6 +36,14 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
             "security" => "is_granted('delete', object)",
             "security_message" => "Only admins or channel members can delete."
         ],
+        'channel-notification' => [
+            'method' => 'GET',
+            'path' => '/channels/{id}/channel-notification',
+            'controller' => ChannelNotficationController::class,
+            'openapi_context' => [
+                'summary' => 'get channel notification',
+            ],
+        ],
     ],
     collectionOperations: [
         'get' => [
@@ -52,7 +60,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
         'api_users_channel_get_subresource' => [
             'method' => 'GET',
             'normalization_context' => [
-                'groups' => ['read:User:item'],
+                'groups' => ['read:Channel:item'],
             ],
         ],
     ],
@@ -85,6 +93,10 @@ class Channel
     )]
     private $subscribers;
 
+    #[Groups(['read:Channel:item'])]
+    private $hasNotification;
+
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
@@ -102,7 +114,7 @@ class Channel
 
         return $this;
     }
-    
+
     public function getName(): ?string
     {
         return $this->name;
@@ -177,20 +189,33 @@ class Channel
             return [
                 'id' => $lastMessage->getId(),
                 'content' => $lastMessage->getContent(),
-                'createdDate' => strtotime($lastMessage->getCreatedDate()->format('Y-m-d H:i:s')) < strtotime('-30 days') ? $lastMessage->getCreatedDate()->format('Y-m-d H:i:s') : $lastMessage->getCreatedDate()->format('H:i:s'),
+                'createdDate' => $lastMessage->getCreatedDate()->format('Y-m-d H:i:s'),
                 'author' => [
                     'id' => $lastMessage->getAuthor()->getId(),
                     'username' => $lastMessage->getAuthor()->getUsername(),
                 ],
             ];
         }
-        return null;
+        return [];
     }
 
-    #[Groups(['read:Channel:collection'])]
-    public function getNotification(): ?array
+    public function getHasNotification(): bool
     {
-        $notification = (new NotificationRepository())->findOneByChannel($this->getId());
-        return $notification ? ['id' => $notification->getId(), 'receiver' => $notification->getReceiver()->getId()]: null;
+        if ($this->hasNotification === null) {
+           return false;
+        }
+        return $this->hasNotification;
     }
+
+    public function setHasNotification(bool $hasNotification): self
+    {
+        $this->hasNotification = $hasNotification;
+
+        return $this;
+    }
+    // public function sethasNotification(bool $hasNotification)
+    // {
+    //     $this->hasNotification = $hasNotification;
+    // }
+
 }
