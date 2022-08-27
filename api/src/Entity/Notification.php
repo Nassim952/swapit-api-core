@@ -9,13 +9,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Action\NotFoundAction;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'controller' => NotFoundAction::class,
-            'read' => false,
-            'output' => false,
+            "security" => "object.getReceiver() == user",
+            "security_message" => "Only admins or author can get.",
         ],
         'delete' => [
             "security" => "object.getReceiver() == user",
@@ -30,6 +33,7 @@ use ApiPlatform\Core\Action\NotFoundAction;
         ],
     ],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'idTable' => 'exact', 'refTable' => 'exact'])]
 class Notification
 {
     #[ORM\Id]
@@ -55,7 +59,7 @@ class Notification
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['read:User:item'])]
+    #[Groups(['read:User:item','read:Notification:item'])]
     #[ApiSubresource(
         maxDepth: 1,
     )]

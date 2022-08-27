@@ -39,9 +39,8 @@ class ChannelDataPersister implements ContextAwareDataPersisterInterface
             // print_r($user, true);
             // $data->addSubscriber($user);
             // return $this->security->getUser();
-            
             if(!empty($data->getSubscribers()) && $this->channelRepository->findOneBySubscribers($data->getSubscribers()->toArray()) == null){
-                $data->addSubscriber($this->security->getUser());
+                $data->addSubscriber($this->security->getUser()); 
                 $data->setName($this->createName($data->getSubscribers()->toArray()));
                 $this->entityManager->persist($data);
                 $this->entityManager->flush();          

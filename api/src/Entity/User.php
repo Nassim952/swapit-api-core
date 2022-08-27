@@ -179,10 +179,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private $resetTokenPassword;
 
 
-
-    /**
-     * @MaxDepth(1)
-     */
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
     #[ApiSubresource(
@@ -206,10 +202,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $wishGames = [];
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
-    private $isMailConfirmed = false;
-
     /**
      * @MaxDepth(1)
      */
@@ -220,15 +212,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     )]
     private $notifications;
 
-    /**
-     * @MaxDepth(1)
-     */
+  
     #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
     #[Groups(['read:User:item'])]
     #[ApiSubresource(
-        maxDepth: 1,
+        maxDepth: 2,
     )]
     private $channels;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $isMailConfirmed = false;
     
     public function __construct()
     {
