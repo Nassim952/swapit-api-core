@@ -59,7 +59,7 @@ class ChannelRepository extends ServiceEntityRepository
     $usersId = array_map(function($user){
         return $user->getId();
     }, $subscribers);
-
+    // dd($usersId);
        return $this->createQueryBuilder('c')
             ->join('c.subscribers', 'u')
             ->where('u.id IN (:usersId)')
@@ -67,5 +67,6 @@ class ChannelRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult()
        ;
+
    }
 }

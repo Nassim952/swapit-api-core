@@ -62,7 +62,7 @@ class ExchangeDataPersister implements ContextAwareDataPersisterInterface
         $notification->setSender($data->getProposer());
         $notification->setDescription('Nouvelle demande d\'echange de '.$data->getProposer()->getUsername().'.');
 
-        if ($data->getOwner() == $this->security->getUser()) {
+        if ($data->getProposer() == $this->security->getUser()) {
             $this->entityManager->persist($notification);
             $this->entityManager->flush();
         }  

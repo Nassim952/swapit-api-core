@@ -38,3 +38,9 @@ services:
         class: App\EventListener\JWTSubscriber
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onLexikJwtAuthenticationOnJwtCreated }
+
+    App\DataProvider\ChannelDataProvider:
+        bind:
+            $collectionDataProvider: '@api_platform.doctrine.orm.default.collection_data_provider'
+            $itemDataProvider: '@api_platform.doctrine.orm.default.item_data_provider'
+            $subresourceDataProvider: '@api_platform.doctrine.orm.default.subresource_data_provider'
