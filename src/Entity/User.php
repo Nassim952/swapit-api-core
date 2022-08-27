@@ -178,6 +178,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Groups(['read:User:item', 'patch:User:item'])]
     private $resetTokenPassword;
 
+
+
     /**
      * @MaxDepth(1)
      */
@@ -188,7 +190,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     )]
     private $receivedExchanges;
 
-  
+
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'proposer', targetEntity: Exchange::class, orphanRemoval: true)]
     #[ApiSubresource(
@@ -227,10 +229,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         maxDepth: 1,
     )]
     private $channels;
-
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
-    private $isMailConfirmed = false;
     
     public function __construct()
     {
@@ -238,18 +236,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         $this->sendExchanges = new ArrayCollection();
         $this->channels = new ArrayCollection();
         $this->channels_received = new ArrayCollection();
-    }
-
-    public function getIsMailConfirmed(): ?bool
-    {
-        return $this->isMailConfirmed;
-    }
-
-    public function setIsMailConfirmed(?bool $isMailConfirmed): self
-    {
-        $this->isMailConfirmed = $isMailConfirmed;
-
-        return $this;
     }
 
     public function getId(): ?int
