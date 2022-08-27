@@ -156,7 +156,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item'])]
+    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item', 'patch:User:item'])]
     private $username;
 
     #[Assert\NotBlank]
@@ -203,6 +203,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Column(type: 'array', nullable: true)]
     #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $wishGames = [];
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[Groups(['read:User:item', 'write:User:item'])]
+    private $isMailConfirmed = false;
 
     /**
      * @MaxDepth(1)
@@ -500,6 +504,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         if ($this->channels->removeElement($channel)) {
             $channel->removeSubscriber($this);
         }
+
+        return $this;
+    }
+
+    public function getIsMailConfirmed(): ?bool
+    {
+        return $this->isMailConfirmed;
+    }
+
+    public function setIsMailConfirmed(?bool $isMailConfirmed): self
+    {
+        $this->isMailConfirmed = $isMailConfirmed;
 
         return $this;
     }
