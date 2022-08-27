@@ -110,7 +110,7 @@ class Exchange
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'receivedExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     #[ApiSubresource(
         maxDepth: 1,
     )]
