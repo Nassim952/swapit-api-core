@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Entity\Channel;
-use App\Filter\UserFilter;
 
 use App\Filter\CountFilter;
 use Doctrine\ORM\Mapping as ORM;
@@ -137,12 +136,11 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
         ],
         'post' => [
             'denormalization_context' => ['groups' => ['post:User:collection'], 'enable_max_depth' => true],
-            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
         ],
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
-#[ApiFilter(UserFilter::class)]
 #[ApiFilter(CountFilter::class)]
 #[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'ownGames' => 'partial', 'wishGames' => 'partial', 'resetTokenPassword' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
@@ -216,12 +214,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
     #[Groups(['read:User:item'])]
     #[ApiSubresource(
-        maxDepth: 2,
+        maxDepth: 1,
     )]
     private $channels;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['read:User:item', 'patch:User:item'])]
     private $isMailConfirmed = false;
     
     public function __construct()

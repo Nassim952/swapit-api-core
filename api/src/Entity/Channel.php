@@ -93,7 +93,7 @@ class Channel
     )]
     private $subscribers;
 
-    #[Groups(['read:Channel:item'])]
+    #[Groups(['read:Channel:collection'])]
     private $hasNotification;
 
 

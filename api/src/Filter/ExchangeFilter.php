@@ -6,9 +6,7 @@ namespace App\Filter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\AbstractContextAwareFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\ORM\QueryBuilder;
-use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
-use App\lib\IgdbBundle\IgdbWrapper;
 
 final class ExchangeFilter extends AbstractContextAwareFilter
 {

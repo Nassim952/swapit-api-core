@@ -32,23 +32,25 @@ class ChannelDataPersister implements ContextAwareDataPersisterInterface
     public function persist($data, array $context = [])
     {
         if (isset($context["collection_operation_name"]) && $context["collection_operation_name"]  == 'post') {
-            // $this->logger->info(print_r($data, true));
-            // dump($data);
-            // print_r($data, true);
-            // $user = $this->security->getUser();
-            // print_r($user, true);
-            // $data->addSubscriber($user);
-            // return $this->security->getUser();
-            if(!empty($data->getSubscribers()) && $this->channelRepository->findOneBySubscribers($data->getSubscribers()->toArray()) == null){
-                $data->addSubscriber($this->security->getUser()); 
-                $data->setName($this->createName($data->getSubscribers()->toArray()));
+            if(empty($data->getSubscribers())){
+                throw new \LogicException('You can not create a channel with no subscribers');
+            }
+
+            $data->addSubscriber($this->security->getUser()); 
+            $data->setName($this->createName($data->getSubscribers()->toArray()));
+
+            if(!$this->exists($data)){ 
                 $this->entityManager->persist($data);
                 $this->entityManager->flush();          
             }
-        } else {
+            else{
+                throw new \LogicException('You can not create a channel with no subscribers');
+            }
+        } else if(isset($context["item_operation_name"]) && in_array($context["item_operation_name"], ['put', 'patch'])) {
             $this->entityManager->persist($data);
             $this->entityManager->flush();
-        }
+        } 
+       
     }
 
     public function createName($subscribers, array $context = [])
@@ -64,6 +66,25 @@ class ChannelDataPersister implements ContextAwareDataPersisterInterface
     {
         $this->entityManager->remove($data);
         $this->entityManager->flush();
+    }
+
+    public function exists($data, array $context = [])
+    {
+        $user = $this->security->getUser();
+
+        $channels = $user->getChannels();
+
+        $names = explode(' ', $data->getName());
+        foreach ($channels as $channel) {
+            $channel_names = explode(' ', $channel->getName());
+            if(count(array_intersect($names, $channel_names)) == count($names)){
+                return true;
+            }
+            // if (array_diff($a, $b) === array_diff($channel_names, $names)) {
+            //     return true;
+            // }
+        }
+        return false;
     }
 
 }

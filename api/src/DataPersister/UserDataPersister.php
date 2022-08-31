@@ -6,16 +6,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Security;
+use App\Repository\UserRepository;
 
 class UserDataPersister implements ContextAwareDataPersisterInterface {
 
     private $entityManager;
     private $passwordHasher;
+    private $security;
+    private $userRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Security $security) {
+    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Security $security, UserRepository $userRepository) {
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
         $this->security = $security;
+        $this->userRepository = $userRepository;
     }
 
     public function supports($data, array $context = []) : bool
@@ -24,13 +28,7 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
     }
 
     public function persist($data, array $context = [])
-    {
-        // if($data->getResetTokenPassword() !== 'null'){
-        //     $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
-        //     $data->setResetTokenPassword('null');
-        //     $data->eraseCredentials();
-        // }
-        
+    {   
         if ($data->getPassword() && !preg_match('/^\$2y/', $data->getPassword())) {
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
             $data->eraseCredentials();
@@ -42,12 +40,14 @@ class UserDataPersister implements ContextAwareDataPersisterInterface {
             }
         } else {
             $data->setRoles(['ROLE_USER']);
+        }   
+
+        if(!isset($context["item_operation_name"]) &&  $this->userRepository ->findOneBy(['email' => $data->getEmail()])) {
+            throw new \LogicException('You can not propose an existing user');
         }
-        
 
         $this->entityManager->persist($data);
         $this->entityManager->flush();
-
     }
 
     public function remove($data, array $context = [])
