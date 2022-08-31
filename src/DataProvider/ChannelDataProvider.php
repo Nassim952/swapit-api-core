@@ -10,6 +10,7 @@ use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\SubresourceDataProviderInterface;
 use Symfony\Component\Security\Core\Security;
 use App\Repository\NotificationRepository;
+use App\Repository\ChannelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Channel;
 
@@ -23,7 +24,8 @@ final class ChannelDataProvider implements ContextAwareCollectionDataProviderInt
     private $subresourceDataProvider;
 
 
-    public function __construct(CollectionDataProviderInterface $collectionDataProvider, ItemDataProviderInterface $itemDataProvider, SubresourceDataProviderInterface $subresourceDataProvider, NotificationRepository $repository, Security $security, EntityManagerInterface $entityManager) {
+
+    public function __construct(CollectionDataProviderInterface $collectionDataProvider, ItemDataProviderInterface $itemDataProvider, SubresourceDataProviderInterface $subresourceDataProvider, NotificationRepository $repository, Security $security, EntityManagerInterface $entityManager, ChannelRepository $channelRepository) {
        
         // dd('toto');
         $this->repository = $repository;
@@ -32,6 +34,7 @@ final class ChannelDataProvider implements ContextAwareCollectionDataProviderInt
         $this->itemDataProvider = $itemDataProvider;
         $this->entityManager = $entityManager;
         $this->subresourceDataProvider = $subresourceDataProvider;
+        $this->channelRepository = $channelRepository;
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
@@ -46,7 +49,7 @@ final class ChannelDataProvider implements ContextAwareCollectionDataProviderInt
         if($channels){
             foreach ($channels as $channel) {
                 $this->UpdateChannelNotification($channel);
-            }
+            }  
         }
         return $channels;
     }
@@ -66,7 +69,6 @@ final class ChannelDataProvider implements ContextAwareCollectionDataProviderInt
 
     public function getSubresource(string $resourceClass, array $identifiers, array $context, string $operationName = null)
     {
-        // dd($resourceClass, $identifiers, $context, $operationName);
         $channels = $this->subresourceDataProvider->getSubresource($resourceClass, $identifiers, $context, $operationName);
         if($channels){
             foreach ($channels as $channel) {

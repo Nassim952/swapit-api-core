@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Channel;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,27 +40,16 @@ class ChannelRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Channel[] Returns an array of Channel objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
    public function findOneBySubscribers($subscribers): ?Channel
    {
     $usersId = array_map(function($user){
-        return $user->getId();
+        if($user instanceof User){
+            return $user->getId();
+        }
+        else{
+            return $user;
+        }
     }, $subscribers);
-    // dd($usersId);
        return $this->createQueryBuilder('c')
             ->join('c.subscribers', 'u')
             ->where('u.id IN (:usersId)')

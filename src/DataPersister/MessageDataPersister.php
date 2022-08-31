@@ -42,6 +42,9 @@ class MessageDataPersister implements ContextAwareDataPersisterInterface
                 $this->initPusher($data);
                 $this->createNotification($data);
             }
+            else {
+                throw new \LogicException('You can not send a mesage in someone else\'s conversation');
+            }
         } else {
             $this->entityManager->persist($data);
             $this->entityManager->flush();
@@ -103,10 +106,6 @@ class MessageDataPersister implements ContextAwareDataPersisterInterface
             return $user->getId();
         }, $message->getChannel()->getSubscribers()->toArray()); 
         
-        // $usersIds = $message->getChannel()->getSubscribers()->map(function (User $user) {
-        //     return $user->getId();
-        // })->toArray();
         return in_array($this->security->getUser()->getId(), $usersIds);
-        // return true;
     }
 }
