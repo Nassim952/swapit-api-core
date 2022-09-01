@@ -16,7 +16,7 @@ class UserSendMailForConfirmationController
             ->from('esgi.swapit@gmail.com')
             ->to($data->getEmail())
             ->subject('Confirmation de votre compte')
-            ->text('Veuillez cliquer sur le lien suivant pour confirmer votre compte : ' . 'http://localhost:8080/' . 'mail-confirmation/' . $cryptedId);
+            ->text('Veuillez cliquer sur le lien suivant pour confirmer votre compte : ' . 'https://swapit-vue.herokuapp.com/' . 'mail-confirmation/' . $cryptedId);
         
         $mailer->send($email);
 
