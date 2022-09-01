@@ -15,7 +15,7 @@ class UserGenerateTokenPasswordController{
             ->from('esgi.swapit@gmail.com')
             ->to($data->getEmail())
             ->subject('Réinitialisation de votre mot de passe')
-            ->text('Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : ' . 'http://localhost:8080/' . 'form-reset-password/' . $data->getResetTokenPassword());
+            ->text('Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : ' . 'https://swapit-vue.herokuapp.com/' . 'form-reset-password/' . $data->getResetTokenPassword());
         
         $mailer->send($email);
 
