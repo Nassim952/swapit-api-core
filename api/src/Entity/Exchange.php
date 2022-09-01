@@ -2,19 +2,20 @@
 
 namespace App\Entity;
 
+use App\Filter\CountFilter;
+use App\Filter\ExchangeFilter;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ExchangeRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ExchangeCancelController;
 use App\Controller\ExchangeRefuseController;
 use App\Controller\ExchangeConfirmController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Core\Annotation\ApiFilter;
-use App\Filter\ExchangeFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
-
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
@@ -22,10 +23,10 @@ use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection']]
+            'normalization_context' => ['groups' => ['read:Exchange:collection', 'read:Exchange:item', 'read:User:collection'], 'enable_max_depth' => true]
         ],
         'patch' => [
-            'denormalization_context' => ['groups' => ['patch:Exchange:item']],
+            'denormalization_context' => ['groups' => ['patch:Exchange:item'], 'enable_max_depth' => true],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
         ],
@@ -67,19 +68,38 @@ use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
         ],
+        'cancel' => [
+            'method' => 'PATCH',
+            'path' => '/exchanges/{id}/cancel',
+            'controller' => ExchangeCancelController::class,
+            'openapi_context' => [
+                'summary' => 'cancel an exchange',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+            "security" => "is_granted('cancel', object)",
+            "security_message" => "Only admins or Owner can cancel this exchange."
+        ],
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection']]
+            "security" => "is_granted('ROLE_ADMIN')",
+            'normalization_context' => ['groups' => ['read:Exchange:collection'], 'enable_max_depth' => true]
         ],
         'post' => [
-            'denormalization_context' => ['groups' => ['write:Exchange:item']]
+            'denormalization_context' => ['groups' => ['post:Exchange:collection'], 'enable_max_depth' => true],
         ],
     ]
 )]
 #[ApiFilter(ExchangeFilter::class)]
 #[ApiFilter(SearchFilter::class, properties: ['confirmed' => 'exact'])]
 #[ApiFilter(PropertyFilter::class)]
+#[ApiFilter(CountFilter::class)]
 class Exchange
 {
     #[ORM\Id]
@@ -90,25 +110,31 @@ class Exchange
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'receivedExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $owner;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'sendExchanges')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $proposer;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $proposerGame;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $senderGame;
 
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['write:Exchange:item', 'read:Exchange:collection'])]
+    #[Groups(['post:Exchange:collection', 'read:Exchange:collection'])]
     private $confirmed;
 
     public function getId(): ?int

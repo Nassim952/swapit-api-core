@@ -6,9 +6,7 @@ namespace App\Filter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\AbstractContextAwareFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\ORM\QueryBuilder;
-use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
-use App\lib\IgdbBundle\IgdbWrapper;
 
 final class ExchangeFilter extends AbstractContextAwareFilter
 {
@@ -32,6 +30,10 @@ final class ExchangeFilter extends AbstractContextAwareFilter
 
         if ($property  == 'pending') {
             $queryBuilder = $queryBuilder->where("$alias.confirmed IS NULL");  
+        }
+
+        if ($property  == 'answered') {
+            $queryBuilder = $queryBuilder->where("$alias.confirmed IS FALSE")->orWhere("$alias.confirmed IS TRUE");;  
         }
 
     }

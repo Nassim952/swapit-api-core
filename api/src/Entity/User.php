@@ -2,36 +2,48 @@
 
 namespace App\Entity;
 
+use App\Entity\Channel;
+
+use App\Filter\CountFilter;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
 
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use App\Filter\Userfilter;
 
-use Doctrine\Common\Collections\Collection;
+
 use ApiPlatform\Core\Annotation\ApiResource;
+
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
+
 use Symfony\Component\Serializer\Annotation\Groups;
 
-use App\DataPersister\UserDataPersister;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Controller\UserGenerateTokenPasswordController;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Controller\UserSetMailConfirmedToTrueController;
+use App\Controller\UserSetPasswordTokenToNullController;
+use App\Controller\UserSendMailForConfirmationController;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
     itemOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:Exchange:collection', 'read:User:collection', 'read:User:item']],
-            // "security" => "is_granted('view', object)",
-            // "security_message" => "Only Admin or Owner can view this resource."
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
+            "security" => "is_granted('view', object)",
+            "security_message" => "Only Admin or Owner can view this resource."
         ],
         'patch' => [
+            'denormalization_context' => ['groups' => ['patch:User:item'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection', 'read:User:item'], 'enable_max_depth' => true],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only Admin or Owner can patch."
         ],
@@ -39,70 +51,183 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             "security" => "is_granted('delete', object)",
             "security_message" => "Only Admin or Owner can delete."
         ],
+        'user-generate-token-password' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/generate-token-password',
+            'controller' => UserGenerateTokenPasswordController::class,
+            'openapi_context' => [
+                'summary' => 'generate token password',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'set-token-reset-password-to-null' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/set-token-reset-password-to-null',
+            'controller' => UserSetPasswordTokenToNullController::class,
+            'openapi_context' => [
+                'summary' => 'set token reset password to null',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'send-mail-for-confirmation' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/send-mail-for-confirmation',
+            'controller' => UserSendMailForConfirmationController::class,
+            'openapi_context' => [
+                'summary' => 'send mail for confirmation',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'send-mail-for-contact' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/send-mail-for-contact',
+            'controller' => UserSendMailForContactController::class,
+            'openapi_context' => [
+                'summary' => 'send mail for contact',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        'set-mail-confirmed-to-true' => [
+            'method' => 'PATCH',
+            'path' => '/users/{id}/set-mail-confirmed-to-true',
+            'controller' => UserSetMailConfirmedToTrueController::class,
+            'openapi_context' => [
+                'summary' => 'set mail confirmed to true',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => []
+                        ]
+                    ]
+                ]
+            ],
+        ],
+        
     ],
     collectionOperations: [
         'get' => [
-            'normalisation_context' => ['groups' => ['read:User:collection']],
+            'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
             "security" => "is_granted('ROLE_ADMIN')",
             "security_message" => "Only Admin or Owner can view this resource."
         ],
         'post' => [
-            // "security" => "is_granted('postAdmin', object)",
-            // "security_message" => "Only admin can create Admin users."
+            'denormalization_context' => ['groups' => ['post:User:collection'], 'enable_max_depth' => true],
+            'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
         ],
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
-#[ApiFilter(UserFilter::class)]
-#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact'])]
+#[ApiFilter(CountFilter::class)]
+#[ApiFilter(SearchFilter::class, properties: ['id' => 'exact', 'username' => 'exact', 'email' => 'exact', 'ownGames' => 'partial', 'wishGames' => 'partial', 'resetTokenPassword' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['read:User:collection'])]
+    #[Groups(['read:User:collection','read:Channel:collection','read:Channel:item'])]
     private $id;
 
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['read:User:collection', 'write:User:item'])]
+    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item', 'patch:User:item'])]
     private $username;
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['write:User:item', 'read:User:item', 'patch:User:item'])]
+    #[Groups(['post:User:collection', 'patch:User:item'])]
     private $password;
 
     #[Assert\Email]
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
     private $email;
 
     #[ORM\Column(type: 'json')]
-    #[Groups(['read:User:item', 'write:User:item'])]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
     private $roles = ["ROLE_USER"];
 
-    #[Groups(['read:User:item', 'patch:User:item'],)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['read:User:item', 'patch:User:item'])]
+    private $resetTokenPassword;
+
+
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $receivedExchanges;
 
-    #[Groups(['read:User:item', 'patch:User:item'])]
+
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'proposer', targetEntity: Exchange::class, orphanRemoval: true)]
-    #[ApiSubresource]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
     private $sendExchanges;
 
     #[ORM\Column(type: 'array', nullable: true)]
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $ownGames = [];
 
     #[ORM\Column(type: 'array', nullable: true)]
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     private $wishGames = [];
 
+    /**
+     * @MaxDepth(1)
+     */
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Notification::class, orphanRemoval: true)]
+    #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
+    private $notifications;
+
+  
+    #[ORM\ManyToMany(targetEntity: Channel::class, mappedBy: 'subscribers')]
+    #[Groups(['read:User:item'])]
+    #[ApiSubresource(
+        maxDepth: 1,
+    )]
+    private $channels;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[Groups(['read:User:item', 'patch:User:item'])]
+    private $isMailConfirmed = false;
+    
     public function __construct()
     {
         $this->receivedExchanges = new ArrayCollection();
         $this->sendExchanges = new ArrayCollection();
+        $this->channels = new ArrayCollection();
+        $this->channels_received = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -170,6 +295,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     {
         $this->email = $email;
 
+        return $this;
+    }
+
+    public function getResetTokenPassword(): ?string
+    {
+        return $this->resetTokenPassword;
+    }
+
+    public function setResetTokenPassword(string $tokenPassword): self
+    {
+        $this->resetTokenPassword = $tokenPassword;
         return $this;
     }
 
@@ -289,6 +425,75 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function setWishGames(?array $wishGames): self
     {
         $this->wishGames = $wishGames;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): self
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications[] = $notification;
+            $notification->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): self
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getReceiver() === $this) {
+                $notification->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Channel>
+     */
+    public function getChannels(): Collection
+    {
+        return $this->channels;
+    }
+
+    public function addChannel(Channel $channel): self
+    {
+        if (!$this->channels->contains($channel)) {
+            $this->channels[] = $channel;
+            $channel->addSubscriber($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannel(Channel $channel): self
+    {
+        if ($this->channels->removeElement($channel)) {
+            $channel->removeSubscriber($this);
+        }
+
+        return $this;
+    }
+
+    public function getIsMailConfirmed(): ?bool
+    {
+        return $this->isMailConfirmed;
+    }
+
+    public function setIsMailConfirmed(?bool $isMailConfirmed): self
+    {
+        $this->isMailConfirmed = $isMailConfirmed;
 
         return $this;
     }

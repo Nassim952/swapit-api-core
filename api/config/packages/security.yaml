@@ -40,7 +40,31 @@ security:
             pattern: ^/exchanges
             stateless: true
             lazy: true
-            methods: [GET, PUT, PATCH, DELETE]
+            methods: [POST, GET, PUT, PATCH, DELETE]
+            provider: users
+            jwt: ~
+
+        channels:
+            pattern: ^/channels
+            stateless: true
+            lazy: true
+            methods: [POST, GET, PATCH, DELETE]
+            provider: users
+            jwt: ~
+
+        messages:
+            pattern: ^/messages
+            stateless: true
+            lazy: true
+            methods: [POST, GET, DELETE]
+            provider: users
+            jwt: ~
+
+        notifications:
+            pattern: ^/notifications
+            stateless: true
+            lazy: true
+            methods: [GET, DELETE]
             provider: users
             jwt: ~
 
@@ -52,15 +76,17 @@ security:
 
     access_control:
         - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Allows accessing the Swagger UI
-        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
         # Entity Users & Exchanges
         - {
-            path: ^/users,
-            roles: IS_AUTHENTICATED_FULLY,
-            methods: [PUT, PATCH, DELETE],
-        }
-        - { path: ^/exchanges, roles: IS_AUTHENTICATED_FULLY }
+              path: ^/users,
+              roles: IS_AUTHENTICATED_FULLY,
+              methods: [GET, PUT, PATCH, DELETE],
+          }
+        - { path: ^/exchanges,
+            roles: [ROLE_USER, ROLE_ADMIN, IS_AUTHENTICATED_FULLY],
+            methods: [POST, GET, PUT, PATCH, DELETE],
+          }
 
         # Backend Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
