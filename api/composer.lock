@@ -6769,17 +6769,17 @@
             "time": "2022-06-26T13:01:22+00:00"
         },
         {
-            "name": "symfony/sendgrid-mailer",
-            "version": "v5.4.7",
+            "name": "symfony/google-mailer",
+            "version": "v5.4.8",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/sendgrid-mailer.git",
-                "reference": "8c1ef727aed18460e91a3ec54237a0e48b80a1dd"
+                "url": "https://github.com/symfony/google-mailer.git",
+                "reference": "8da892489a7536e869c56efa06bf2f74f15a4693"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/sendgrid-mailer/zipball/8c1ef727aed18460e91a3ec54237a0e48b80a1dd",
-                "reference": "8c1ef727aed18460e91a3ec54237a0e48b80a1dd",
+                "url": "https://api.github.com/repos/symfony/google-mailer/zipball/8da892489a7536e869c56efa06bf2f74f15a4693",
+                "reference": "8da892489a7536e869c56efa06bf2f74f15a4693",
                 "shasum": ""
             },
             "require": {
@@ -6787,13 +6787,10 @@
                 "psr/event-dispatcher": "^1",
                 "symfony/mailer": "^4.4|^5.0|^6.0"
             },
-            "require-dev": {
-                "symfony/http-client": "^4.4|^5.0|^6.0"
-            },
             "type": "symfony-mailer-bridge",
             "autoload": {
                 "psr-4": {
-                    "Symfony\\Component\\Mailer\\Bridge\\Sendgrid\\": ""
+                    "Symfony\\Component\\Mailer\\Bridge\\Google\\": ""
                 },
                 "exclude-from-classmap": [
                     "/Tests/"
@@ -6813,10 +6810,10 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Symfony Sendgrid Mailer Bridge",
+            "description": "Symfony Google Mailer Bridge",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/sendgrid-mailer/tree/v5.4.7"
+                "source": "https://github.com/symfony/google-mailer/tree/v5.4.8"
             },
             "funding": [
                 {
@@ -6832,7 +6829,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-24T17:11:08+00:00"
+            "time": "2022-04-12T15:48:08+00:00"
         },
         {
             "name": "symfony/serializer",
