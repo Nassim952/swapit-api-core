@@ -10,7 +10,7 @@ use App\Repository\GameRepository;
 use Symfony\Component\PropertyInfo\Type;
 use App\lib\IgdbBundle\IgdbWrapper;
 
-final class UserFilter extends AbstractContextAwareFilter
+final class CountFilter extends AbstractContextAwareFilter
 {
     protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, string $operationName = null)
     {
@@ -30,21 +30,13 @@ final class UserFilter extends AbstractContextAwareFilter
         $parameterName = $queryNameGenerator->generateParameterName($property); // Generate a unique parameter name to avoid collisions with other filters
  
 
-        if ($property  == 'ids') {
-            $queryBuilder = $queryBuilder->where("$alias.id IN (:$parameterName)")
-                ->setParameter($parameterName, $value);
+        if($property == 'count') {
+            if ($value) {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->Join("$alias.$value", 'e')->groupBy("$alias.id");
+            } else {
+                $queryBuilder = $queryBuilder->select("COUNT($alias.id)")->groupBy("$alias.id");
+            }
         }
-
-        if($property  == 'owned_games'){
-            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.ownGames)")
-                ->setParameter($parameterName, $value);
-        }
-        if($property  == 'wished_games') {
-
-            $queryBuilder = $queryBuilder->where(":$parameterName IN ($alias.wishGames)")
-                ->setParameter($parameterName, $value);
-        }
-
     }
 
     // This function is only used to hook in documentation generators (supported by Swagger and Hydra)

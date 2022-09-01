@@ -47,4 +47,16 @@ class ExchangeRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function findOneUsers($users, $game): ?Exchange
+    {
+        $query = $this->createQueryBuilder('e')
+            ->where('e.proposer IN (:users)')
+            ->andWhere('e.owner IN (:users)')
+            ->andWhere('e.senderGame = :game')
+            ->setParameter('users', $users)
+            ->setParameter('game', $game)
+            ->getQuery();
+        return $query->getOneOrNullResult();
+    }
 }
