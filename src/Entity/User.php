@@ -27,6 +27,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use App\Controller\UserSetMailConfirmedToTrueController;
 use App\Controller\UserSetPasswordTokenToNullController;
 use App\Controller\UserSendMailForConfirmationController;
+use App\Controller\UserGameOwnerController;
+use App\Controller\UserCheckExistingChannelController;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -126,7 +128,16 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
                 ]
             ],
         ],
-        
+        'check-existing-channel' => [
+            'method' => 'GET',
+            'path' => '/users/{id}/check-existing-channel',
+            'controller' => UserCheckExistingChannelController::class,
+            'openapi_context' => [
+                'summary' => 'check existing channel',
+            ],
+            'security' => "is_granted('ROLE_USER')",
+        ],
+          
     ],
     collectionOperations: [
         'get' => [
@@ -138,6 +149,28 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
             'denormalization_context' => ['groups' => ['post:User:collection'], 'enable_max_depth' => true],
             'normalization_context' => ['groups' => ['read:User:collection'], 'enable_max_depth' => true],
         ],
+        'game-owner' => [
+            'method' => 'GET',
+            'path' => '/users/{gameID}/game-owner',
+            
+            'controller' => UserGameOwnerController::class,
+            'openapi_context' => [
+                'summary' => 'game owner',
+                'parameters' => [
+                    [
+                        'name' => 'gameID',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ],
+                        'read' => false,
+                    ]
+                ]
+            ],
+            'normalization_context' => ['groups' => ['read:User:gameOwner'], 'enable_max_depth' => true],
+            'security' => "is_granted('ROLE_USER')",
+        ],
     ]
 )]
 #[ApiFilter(PropertyFilter::class)]
@@ -148,13 +181,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['read:User:collection','read:Channel:collection','read:Channel:item'])]
+    #[Groups(['read:User:collection','read:Channel:collection','read:Channel:item','read:User:gameOwner'])]
     private $id;
 
 
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item', 'patch:User:item'])]
+    #[Groups(['read:User:collection', 'post:User:collection', 'read:Channel:collection','read:Channel:item', 'patch:User:item','read:User:gameOwner','read:Exchange:collection'])]
     private $username;
 
     #[Assert\NotBlank]
@@ -165,11 +198,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[Assert\Email]
     #[Assert\NotBlank]
     #[ORM\Column(type: 'string', length: 255, unique: true)]
-    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item','read:User:collection'])]
     private $email;
 
     #[ORM\Column(type: 'json')]
-    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item'])]
+    #[Groups(['post:User:collection', 'read:User:item', 'patch:User:item','read:User:collection'])]
     private $roles = ["ROLE_USER"];
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -177,7 +210,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private $resetTokenPassword;
 
 
-    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'],)]
+    #[Groups(['read:User:item', 'patch:User:item', 'read:User:collection'])]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Exchange::class, orphanRemoval: true)]
     #[ApiSubresource(
         maxDepth: 1,
@@ -219,7 +252,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private $channels;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['read:User:item', 'patch:User:item'])]
+    #[Groups(['read:User:item', 'patch:User:item','read:User:collection'])]
     private $isMailConfirmed = false;
     
     public function __construct()
@@ -497,4 +530,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
         return $this;
     }
+
+    
+    #[Groups(['read:User:gameOwner', 'read:User:collections'])]
+    public function getTotalNumberExchanges(): ?int
+    {
+        $exchanges =   $this->getReceivedExchanges()->toArray() ?? [] + $this->getSendExchanges()->toAarray() ?? [] ;
+
+        $exchangeConfirmed = array_filter($exchanges, function($exchange)  {
+            return $exchange->getConfirmed();
+        });
+
+        return count($exchangeConfirmed);
+    }
+
+    #[Groups(['read:User:gameOwner', 'read:User:collections'])]
+    public function getNumberExchangesSent(): ?int
+    {
+        $exchanges =   $this->getReceivedExchanges()->toArray() ?? [] + $this->getSendExchanges()->toAarray() ?? [] ;
+
+        $exchangeConfirmed = array_filter($exchanges, function($exchange)  {
+            return $exchange->getConfirmed();
+        });
+
+        return count($exchangeConfirmed);
+    }
+    
 }
