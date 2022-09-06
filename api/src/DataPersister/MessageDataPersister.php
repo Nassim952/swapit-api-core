@@ -60,13 +60,13 @@ class MessageDataPersister implements ContextAwareDataPersisterInterface
     public function initPusher($data, array $context = [])
     {
         $options = array(
-            'cluster' => 'eu',
+            'cluster' => '%env(PUSHER_APP_CLUSTER)%',
             'useTLS' => true
           );
           $pusher = new Pusher(
-            '498f9f1d1a87ee7c6ee2',
-            'c651e4db8bd4cd7e3fe7',
-            '1456123',
+            '%env(PUSHER_KEY)%',
+            '%env(PUSHER_SECRET)%',
+            '%env(PUSHER_APP_ID)%',
             $options
           );
 
