@@ -12,6 +12,10 @@ class ExchangeRefuseController
     public function __invoke(Exchange $data, MailerInterface $mailer): Exchange
     {
 
+        if($data->getConfirmed() !== null){
+            throw new \LogicException('You can not refuse an exchange already confirmed or refused');
+        }
+        
         $data->setConfirmed(false);
 
         // l'owner reçoit l'échange
