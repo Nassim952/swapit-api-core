@@ -46,7 +46,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => []
                         ]
                     ]
-                ]
+                        ],
+                    'api_item_operation_name' => 'accept',
             ],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
@@ -63,7 +64,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => []
                         ]
                     ]
-                ]
+                ],
+                'api_item_operation_name' => 'refuse',
             ],
             "security" => "is_granted('edit', object)",
             "security_message" => "Only admins or Owner can patch."
@@ -80,7 +82,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => []
                         ]
                     ]
-                ]
+                ],
+                    'api_item_operation_name' => 'cancel',
             ],
             "security" => "is_granted('cancel', object)",
             "security_message" => "Only admins or Owner can cancel this exchange."
