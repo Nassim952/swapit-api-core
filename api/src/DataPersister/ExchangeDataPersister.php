@@ -35,19 +35,18 @@ class ExchangeDataPersister implements ContextAwareDataPersisterInterface
             
             $user = $this->security->getUser();
             $data->setProposer($user);
-            // faire un retour msg permission denied
-            if ($data->getOwner() != $user && !$this->exchangeExiste($data)) {
-                $this->entityManager->persist($data);
-                $this->entityManager->flush();
-                $this->createNotification($data);
-            } else {
+            if ($data->getOwner() == $user && $this->exchangeExiste($data)) {
                 throw new \LogicException('You can not propose your own exchange or an exchange already proposed/recieved');
             }
-        } 
-
-        $this->entityManager->persist($data);
+            $this->entityManager->persist($data); 
+        } else if (isset($context["item_operation_name"]) && in_array($context["item_operation_name"], ['cancel'])) {
+            $this->entityManager->remove($data);
+        } else {
+            $this->entityManager->persist($data);
+        }
+        
+        $this->createNotification($data,$context);
         $this->entityManager->flush();
-        $this->createNotification($data);
        
     }
 
@@ -59,30 +58,23 @@ class ExchangeDataPersister implements ContextAwareDataPersisterInterface
 
     public function createNotification($data, array $context = [])
     {
-        $sender = $this->security->getUser();
-        $receiver = $data->getOwner() == $sender ? $data->getProposer() : $data->getOwner();
-
-        $notification = new Notification();
-        $notification->setRefTable('Exchange');
-        $notification->setCreatedAt(new \DateTimeImmutable());
-        $notification->setIdTable($data->getId());
-        $notification->setReceiver($receiver);
-        $notification->setSender($sender);
-
-        if(isset($context["item_operation_name"]) && in_array($context["item_operation_name"], ['put', 'patch'])){
-            $this->clearNotification($data);
-            $notification->setDescription(
-                'La proposition d\'échange pour '
-                . $data->getSenderGame()->getName()
-                .' a été'
-                .$receiver == $data->getProposer() ? $data->getConfirmed() ? ' acceptée':' refusée' : ' anulée'   
-            );
-        } else {
+        if(isset($context["item_operation_name"]) && in_array($context["item_operation_name"], ['refuse', 'accept', 'cancel'])) {
+            $this->clearNotification($data->getId());
+         } else {
+            $sender = $this->security->getUser();
+            $receiver = $data->getOwner() == $sender ? $data->getProposer() : $data->getOwner();
+    
+            $notification = new Notification();
+            $notification->setRefTable('Exchange');
+            $notification->setCreatedAt(new \DateTimeImmutable());
+            $notification->setIdTable($data->getId());
+            $notification->setReceiver($receiver);
+            $notification->setSender($sender);
             $notification->setDescription('Nouvelle demande d\'echange de '.$sender->getUsername().'.');
-        }    
-        
-        $this->entityManager->persist($notification);
-        $this->entityManager->flush();
+
+            $this->entityManager->persist($notification);
+            $this->entityManager->flush();
+         }
     }
 
     public function exchangeExiste($data, array $context = [])
@@ -93,19 +85,26 @@ class ExchangeDataPersister implements ContextAwareDataPersisterInterface
         $exhanges = (array)$sent_exchanges->toArray() + (array)$received_exchanges->toArray();
     
         foreach ($exhanges as $exhange) {
-            if ((( $exhange->getProposerGame() == $data->getProposerGame() && $exhange->getSenderGame() == $data->getSenderGame()) 
-            || ($exhange->getProposerGame() == $data->getSenderGame() && $exhange->getSenderGame() == $data->getProposerGame())) 
-            && (($exhange->getOwner() == $data->getOwner() && $exhange->getProposer() == $data->getProposer()) 
-            || ($exhange->getOwner() == $data->getProposer() && $exhange->getProposer() == $data->getOwner()))) {
-                return true;
-            }
+                if ((
+                    ( $exhange->getProposerGame() == $data->getProposerGame() && $exhange->getSenderGame() == $data->getSenderGame()) 
+                || ($exhange->getProposerGame() == $data->getSenderGame() && $exhange->getSenderGame() == $data->getProposerGame())
+                ) 
+                && (
+                    ($exhange->getOwner() == $data->getOwner() && $exhange->getProposer() == $data->getProposer()) 
+                || ($exhange->getOwner() == $data->getProposer() && $exhange->getProposer() == $data->getOwner())
+                )) {
+                    return true;
+                }
         }
         return false;
     }
 
-    public function clearNotification($data)
+    public function clearNotification($id_table)
     {
-        $id_table = $data->getId();
-        $this->entityManager->createQuery(`DELETE FROM App\Entity\Notification WHERE ref_table = "Exchange" AND id_table = $id_table`)->execute();
+        $notifications = $this->entityManager->getRepository(Notification::class)->findBy(['refTable' => 'Exchange', 'idTable' => $id_table]);
+        foreach ($notifications as $notification) {
+            $this->entityManager->remove($notification);
+        }
+        $this->entityManager->flush();
     }
 }

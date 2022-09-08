@@ -9,6 +9,9 @@ use Symfony\Component\Mailer\MailerInterface;
 class ExchangeCancelController{
     public function __invoke(Exchange $data, MailerInterface $mailer): Exchange
     {
+        if($data->getConfirmed() !== null){
+            throw new \LogicException('You can not cancel an exchange already confirmed or refused');
+        }
 
         $data->setConfirmed(false);
 
